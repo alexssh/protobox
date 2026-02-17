@@ -1,7 +1,6 @@
 # Proto
 
 React 18 + TypeScript prototyping framework for rapid project development. 
-Scaffold projects, build isolated apps, preview with parameter UI, use declarative utilities.
 
 ## Overview
 
