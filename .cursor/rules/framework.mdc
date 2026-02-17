@@ -1,0 +1,34 @@
+---
+description: Proto framework development - architecture, build isolation, CLI, libs, preview
+globs: src/**/*, vite*.config.ts, package.json
+alwaysApply: false
+---
+
+# Proto Framework Development
+
+## Architecture
+
+- **CLI** (`src/cli.ts`, `src/commands/`): Node-only, no React. Must not import libs or preview.
+- **Libs** (`src/libs/`): Tree-shakable utilities. No CLI or preview imports.
+- **Preview** (`src/preview/`): React app. Loads built apps only via iframe; never imports project code.
+
+## Build Isolation
+
+- Each target builds separately: `build:cli`, `build:libs`, `build:preview`.
+- Libs use separate entry points: `proto`, `proto/context`, `proto/parameters`, `proto/useProtoParams`.
+
+## Patterns
+
+- **Declarative over imperative**: Parameters, context use declarative APIs.
+- **Minimal dependencies**: Avoid heavy state libs; Immer is optional via `useImmer`.
+- **Simple patterns**: No magic, predictable resolution, readable to LLMs.
+
+## CLI Commands
+
+- `init`, `build`, `watch`, `run`, `add` — one file per command.
+- Lazy-load only when needed; avoid pulling unused modules at startup.
+
+## Extension Points
+
+- Add preset templates in `templates/presets/*.txt` with `{{NAME}}`, `{{NAMEPASCAL}}`.
+- Extend libs by adding new modules under `src/libs/` and exporting in `index.ts`.

@@ -1,0 +1,24 @@
+{
+  "name": "proto-project",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "proto build",
+    "watch": "proto watch",
+    "server": "proto run"
+  },
+  "dependencies": {
+    "immer": "^10.0.3",
+    "proto": "*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "sass": "^1.69.5",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0"
+  }
+}

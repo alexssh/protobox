@@ -1,0 +1,11 @@
+import React from 'react'
+
+import './{{NAMEPASCAL}}.scss'
+
+interface {{NAMEPASCAL}}Props {
+  children?: React.ReactNode
+}
+
+export function {{NAMEPASCAL}}({ children }: {{NAMEPASCAL}}Props) {
+  return <div className="{{NAME}}-view">{children}</div>
+}

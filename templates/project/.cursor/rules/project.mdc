@@ -1,0 +1,59 @@
+---
+description: Proto project development - apps, components, views, config
+globs: "**/src/**/*"
+alwaysApply: false
+---
+
+# Proto Project Development
+
+## Structure
+
+```
+src/
+  apps/       # config.ts, App.tsx, App.scss, main.tsx (index.html generated at build)
+  components/ # Name/v1/Name.tsx + Name.scss; use v1, v2 for versions
+  views/      # Name/v1/Name.tsx + Name.scss; one view per app
+  data/       # Shared data
+  types/      # global/ (all apps), {{appName}}/ (per-app)
+```
+
+## Apps
+
+- Each app is isolated. `config.ts` has `title`, `description`, `parameters`.
+- Use params: `import { useProtoParams } from 'proto/useProtoParams'` then `const params = useProtoParams()`
+- No inline styles; use SCSS files.
+
+## Parameters
+
+Use `proto/parameters` in config:
+
+```ts
+paramBoolean("key", "Label", true)
+paramNumber("key", "Label", 0, { min, max, step })
+paramString("key", "Label", "")
+paramOption("key", "Label", "default", [{ value, label }])
+paramOptionMulti("key", "Label", [], [{ value, label }])
+```
+
+## Imports
+
+- Use hard-coded paths: `import { Card } from '@/components/Card/v1/Card'` or `v2/Card`.
+- One view per app. Always define an interface for components.
+
+## Context
+
+```tsx
+const { Provider, useValue } = createProtoContext({ name, initialState, useImmer });
+// Use Provider at app root; useValue() in children.
+```
+
+## Types Isolation
+
+- `types/global/` — any app can import (Window augmentation)
+- `types/{{appName}}/` — only that app should import; keeps app-specific types scoped
+
+## Do Not
+
+- Use heavy state frameworks; keep data in props, context, or hooks.
+- Import other apps; each app is self-contained.
+- Duplicate shared components; reference from `@/components`, `@/views`.

@@ -1,0 +1,26 @@
+---FILE---
+import { paramBoolean, paramString } from 'proto/parameters'
+
+export default {
+  title: '{{NAMEPASCAL}}',
+  description: '{{NAMEPASCAL}} app',
+  parameters: [
+    paramBoolean('enabled', 'Enabled', true),
+    paramString('name', 'Name', '{{NAME}}'),
+  ],
+}
+---FILE---
+import React from 'react'
+import { useProtoParams } from 'proto/useProtoParams'
+
+import './App.scss'
+
+export default function App() {
+  const params = useProtoParams()
+  return (
+    <div className="{{NAME}}-app">
+      <h1 className="{{NAME}}-app__title">{{NAMEPASCAL}} App</h1>
+      <pre className="{{NAME}}-app__params">{JSON.stringify(params, null, 2)}</pre>
+    </div>
+  )
+}
