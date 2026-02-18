@@ -10,7 +10,7 @@ const outDir = process.env.PBOX_OUT_DIR ?? resolve(projectRoot, 'build')
 
 export default defineConfig({
   base: './',
-  root: projectRoot,
+  root: appRoot,
   publicDir: false,
   optimizeDeps: {
     include: ['react', 'react-dom', 'react/jsx-runtime'],
