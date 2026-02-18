@@ -9,7 +9,11 @@
 		"noImplicitAny": false,
     "jsx": "react-jsx",
     "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] }
+    "paths": {
+      "@/*": ["src/*"],
+      "protobox": ["../protobox/dist/libs/index.d.ts"],
+      "protobox/*": ["../protobox/dist/libs/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

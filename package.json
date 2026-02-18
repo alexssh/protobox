@@ -7,16 +7,24 @@
     "pbox": "./dist/cli.js"
   },
   "main": "./dist/libs/index.js",
+  "types": "./dist/libs/index.d.ts",
   "exports": {
-    ".": "./dist/libs/index.js",
-    "./*": "./dist/libs/*.js"
+    ".": {
+      "types": "./dist/libs/index.d.ts",
+      "default": "./dist/libs/index.js"
+    },
+    "./*": {
+      "types": "./dist/libs/*.d.ts",
+      "default": "./dist/libs/*.js"
+    }
   },
   "files": [
     "dist",
     "templates"
   ],
   "scripts": {
-    "build": "npm run build:cli && npm run build:libs && npm run build:preview",
+    "build": "npm run build:cli && npm run build:libs && npm run build:types && npm run build:preview",
+    "build:types": "tsc -p tsconfig.libs.json",
     "build:cli": "vite build --config vite.cli.config.ts",
     "build:libs": "vite build --config vite.libs.config.ts",
     "build:preview": "vite build --config vite.preview.config.ts",
