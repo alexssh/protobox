@@ -23,3 +23,5 @@ export {
 } from './parameters.js'
 
 export { useProtoParams } from './useProtoParams.js'
+
+export { bem } from './bem.js'
