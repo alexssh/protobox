@@ -6,8 +6,6 @@
   "editor.tabSize": 2,
   "editor.formatOnSave": true,
   "editor.formatOnPaste": false,
-  "eslint.enable": true,
-  "eslint.useFlatConfig": true,
   "eslint.validate": [
     "javascript",
     "typescript",
