@@ -6,16 +6,16 @@ export default {
   description: '{{NAMEPASCAL}} app',
   parameters: [
     paramBoolean('enabled', 'Enabled', true),
-    paramString('name', 'Name', '{{NAME}}'),
+    paramString('name', 'Name', '{{NAMEPASCAL}}'),
   ],
 }
 ---FILE---
 import React from 'react'
 import { useProtoParams } from 'protobox/useProtoParams'
 
-import './App.scss'
+import './{{NAMEPASCAL}}.scss'
 
-export default function App() {
+export default function {{NAMEPASCAL}}() {
   const params = useProtoParams()
   return (
     <div className="{{NAME}}-app">

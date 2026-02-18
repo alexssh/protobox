@@ -10,12 +10,20 @@ alwaysApply: false
 
 ```
 src/
-  apps/       # config.ts, App.tsx, App.scss, main.tsx (index.html generated at build)
+  apps/       # PascalCase dirs: App.tsx → Name.tsx, Name.scss, main.tsx, config.ts, context.tsx
   components/ # Name/v1/Name.tsx + Name.scss; use v1, v2 for versions
   views/      # Name/v1/Name.tsx + Name.scss; one view per app
   data/       # Shared data
-  types/      # global/ (all apps), {{appName}}/ (per-app)
+  types/      # global/ (all apps), {{AppName}}/ (per-app, PascalCase)
 ```
+
+## Naming
+
+- All entity directories (apps, components, views, types) use **PascalCase**: `Chart`, `DemoView`, `Card`.
+- App files are named after the app: `Chart.tsx`, `Chart.scss` (not `App.tsx`).
+- Component/view files are named after the entity: `Card.tsx`, `ChartView.tsx`.
+- CSS classes use **kebab-case**: `.chart-app`, `.card--v1`, `.demo-view`.
+- `main.tsx` and `config.ts` keep their generic names (entry point and config).
 
 ## Apps
 
@@ -25,7 +33,7 @@ src/
 
 ## Parameters
 
-Use `protobox/parameters` in config:
+Use `protobox/parameters` in app `config.ts`:
 
 ```ts
 paramBoolean("key", "Label", true)
@@ -35,10 +43,12 @@ paramOption("key", "Label", "default", [{ value, label }])
 paramOptionMulti("key", "Label", [], [{ value, label }])
 ```
 
+Parameters are only for apps. Components and views do not have parameters or config files.
+
 ## Imports
 
-- Use hard-coded paths: `import { Card } from '@/components/Card/v1/Card'` or `v2/Card`.
-- One view per app. Always define an interface for components.
+- Use hard-coded versioned paths: `import { Card } from '@/components/Card/v1/Card'`.
+- One view per app. Always define an interface for components and views.
 
 ## Context
 
@@ -50,10 +60,11 @@ const { Provider, useValue } = createProtoContext({ name, initialState, useImmer
 ## Types Isolation
 
 - `types/global/` — any app can import (Window augmentation)
-- `types/{{appName}}/` — only that app should import; keeps app-specific types scoped
+- `types/{{AppName}}/` — only that app should import; keeps app-specific types scoped
 
 ## Do Not
 
 - Use heavy state frameworks; keep data in props, context, or hooks.
 - Import other apps; each app is self-contained.
 - Duplicate shared components; reference from `@/components`, `@/views`.
+- Add parameters, config.ts, or main.tsx to components or views.

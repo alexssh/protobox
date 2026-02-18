@@ -5,7 +5,7 @@ React 18 + TypeScript prototyping framework for rapid project development.
 ## Overview
 
 - **Scaffold** projects from templates
-- **Build** each app separately into `build/appName`
+- **Build** each app separately into `build/AppName`
 - **Preview** apps in a standard shell with parameter controls
 - **Declarative** utilities: context, parameters, useProtoParams
 
@@ -16,9 +16,9 @@ pbox init             # scaffold project
 pbox build            # build all apps
 pbox watch            # build + watch
 pbox run              # start preview server (or npm run server)
-pbox add app foo      # add app
-pbox add component Bar
-pbox add view Dashboard
+pbox add app Chart    # add app  → src/apps/Chart/
+pbox add component Card  # add component → src/components/Card/v1/
+pbox add view Dashboard  # add view → src/views/Dashboard/v1/
 ```
 
 ## Preview
@@ -33,14 +33,27 @@ pbox add view Dashboard
 
 ```
 src/
-  apps/          # one folder per app
+  apps/          # one folder per app (PascalCase: Chart/, Demo/)
   components/    # shared components (Name/v1/Name.tsx + Name.scss)
   views/         # composite views (Name/v1/Name.tsx + Name.scss)
   data/          # shared data
-  types/         # global/ (all apps), {{appName}}/ (per-app)
+  types/         # global/ (all apps), AppName/ (per-app, PascalCase)
 ```
 
-Each app has `config.ts`, `App.tsx`, `main.tsx`. `index.html` is generated at build with default params. Apps use shared components/views/data but build in isolation.
+### Naming Convention
+
+All entity directories use **PascalCase**: `Chart`, `DemoView`, `Card`.
+
+| Entity    | Directory               | Files                                          |
+| --------- | ----------------------- | ---------------------------------------------- |
+| App       | `src/apps/Chart/`       | `Chart.tsx`, `Chart.scss`, `main.tsx`, `config.ts`, `context.tsx` |
+| Component | `src/components/Card/`  | `v1/Card.tsx`, `v1/Card.scss`, `index.ts`      |
+| View      | `src/views/ChartView/`  | `v1/ChartView.tsx`, `v1/ChartView.scss`, `index.ts` |
+
+- App files are named after the app (`Chart.tsx`, not `App.tsx`)
+- CSS classes use **kebab-case**: `.chart-app`, `.card--v1`, `.demo-view`
+- `main.tsx` and `config.ts` keep generic names (entry point and config)
+- Components and views do **not** have `main.tsx`, `config.ts`, or parameters
 
 ### Context
 
@@ -63,6 +76,8 @@ const { state, setState, update } = useValue();
 
 ### Parameters
 
+Parameters are defined only in app `config.ts`:
+
 ```tsx
 import { paramBoolean, paramString, paramOption } from "protobox/parameters";
 
@@ -79,20 +94,21 @@ parameters: [
 
 ### Imports
 
-Use hard-coded paths: `import { X } from "@/components/Card/v1/Card"` or `@/components/Card/v2/Card`. One view per app. All components and views define an interface.
+Use hard-coded versioned paths: `import { X } from "@/components/Card/v1/Card"` or `@/components/Card/v2/Card`. One view per app. All components and views define an interface.
 
 ### Types
 
 - `types/global/` — shared across all apps (Window augmentation)
-- `types/{{appName}}/` — app-specific; only that app should import
+- `types/AppName/` — app-specific (PascalCase); only that app should import
 
 ### Workflow
 
 1. `pbox init` → scaffold
-2. `pbox add app myapp` → new app (creates `types/myapp/`)
-3. `pbox add view Chart` → new view
-4. Edit `config.ts`, `App.tsx`
-5. `npm run watch` + `npm run server` → iterate
+2. `pbox add app MyApp` → new app (creates `src/apps/MyApp/`, `src/types/MyApp/`)
+3. `pbox add view MyView` → new view (`src/views/MyView/v1/`)
+4. `pbox add component Button` → new component (`src/components/Button/v1/`)
+5. Edit `config.ts`, `MyApp.tsx`
+6. `npm run watch` + `npm run server` → iterate
 
 ## Framework
 
@@ -117,7 +133,7 @@ templates/
 
 ### Extension
 
-- Add templates in `templates/presets/` (`*.txt` with `{{NAME}}`, `{{NAMEPASCAL}}`)
+- Add templates in `templates/presets/` (`*.txt` with `{{NAME}}` for kebab-case, `{{NAMEPASCAL}}` for PascalCase)
 - Customize project template in `templates/project/`
 - Libs are minimal; extend via new modules
 

@@ -238,7 +238,6 @@ async function add(args2) {
     process.exit(1);
   }
   const cwd = process.cwd();
-  resolve(__dirname$1, "../templates/presets");
   const presets = {
     app: (n) => addApp(cwd, n),
     component: (n) => addComponent(cwd, n),
@@ -252,37 +251,39 @@ async function add(args2) {
   fn(name);
 }
 function addApp(cwd, name) {
-  const appDir = resolve(cwd, "src/apps", name);
+  const pascal = toPascal(name);
+  const kebab = toKebab(name);
+  const appDir = resolve(cwd, "src/apps", pascal);
   if (existsSync(appDir)) {
-    console.error(`App ${name} already exists`);
+    console.error(`App ${pascal} already exists`);
     process.exit(1);
   }
   mkdirSync(appDir, { recursive: true });
   const template = readTemplate("app");
-  const files = template.replace(/\{\{NAME\}\}/g, name).replace(/\{\{NAMEPASCAL\}\}/g, toPascal(name));
+  const files = template.replace(/\{\{NAME\}\}/g, kebab).replace(/\{\{NAMEPASCAL\}\}/g, pascal);
   const parts = files.split("---FILE---");
   const configTs = parts[1]?.trim() ?? "";
   const appTsx = parts[2]?.trim() ?? "";
-  const typesDir = resolve(cwd, "src/types", name);
+  const typesDir = resolve(cwd, "src/types", pascal);
   mkdirSync(typesDir, { recursive: true });
   writeFileSync(
     resolve(typesDir, "index.ts"),
-    `/** Types specific to the ${name} app. Import from "@/types/${name}". */
+    `/** Types specific to the ${pascal} app. Import from "@/types/${pascal}". */
 export {};
 `
   );
   writeFileSync(
-    resolve(appDir, "App.scss"),
-    `.${name}-app {
+    resolve(appDir, `${pascal}.scss`),
+    `.${kebab}-app {
   padding: 1rem;
   font-family: system-ui;
 }
 
-.${name}-app__title {
+.${kebab}-app__title {
   margin: 0 0 1rem;
 }
 
-.${name}-app__params {
+.${kebab}-app__params {
   font-size: 0.875rem;
   background: #f5f5f5;
   padding: 1rem;
@@ -291,51 +292,55 @@ export {};
 `
   );
   writeFileSync(resolve(appDir, "config.ts"), configTs);
-  writeFileSync(resolve(appDir, "App.tsx"), appTsx);
+  writeFileSync(resolve(appDir, `${pascal}.tsx`), appTsx);
   writeFileSync(
     resolve(appDir, "main.tsx"),
-    `import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
+    `import React from "react"
+import ReactDOM from "react-dom/client"
+import ${pascal} from "./${pascal}"
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+    <${pascal} />
+  </React.StrictMode>,
+)
 `
   );
-  console.log(`Created app: src/apps/${name}`);
+  console.log(`Created app: src/apps/${pascal}`);
 }
 function addComponent(cwd, name) {
-  const baseDir = resolve(cwd, "src/components", name);
+  const pascal = toPascal(name);
+  const kebab = toKebab(name);
+  const baseDir = resolve(cwd, "src/components", pascal);
   const v1Dir = resolve(baseDir, "v1");
   mkdirSync(v1Dir, { recursive: true });
   const template = readTemplate("component");
-  const content = template.replace(/\{\{NAME\}\}/g, name).replace(/\{\{NAMEPASCAL\}\}/g, toPascal(name));
-  writeFileSync(resolve(v1Dir, `${toPascal(name)}.tsx`), content);
-  writeFileSync(resolve(v1Dir, `${toPascal(name)}.scss`), `.${name} {
+  const content = template.replace(/\{\{NAME\}\}/g, kebab).replace(/\{\{NAMEPASCAL\}\}/g, pascal);
+  writeFileSync(resolve(v1Dir, `${pascal}.tsx`), content);
+  writeFileSync(resolve(v1Dir, `${pascal}.scss`), `.${kebab} {
   margin: 0;
 }
 `);
-  writeFileSync(resolve(baseDir, "index.ts"), `export { ${toPascal(name)} } from './v1/${toPascal(name)}'
+  writeFileSync(resolve(baseDir, "index.ts"), `export { ${pascal} } from './v1/${pascal}'
 `);
-  console.log(`Created component: src/components/${name}`);
+  console.log(`Created component: src/components/${pascal}`);
 }
 function addView(cwd, name) {
-  const baseDir = resolve(cwd, "src/views", name);
+  const pascal = toPascal(name);
+  const kebab = toKebab(name);
+  const baseDir = resolve(cwd, "src/views", pascal);
   const v1Dir = resolve(baseDir, "v1");
   mkdirSync(v1Dir, { recursive: true });
   const template = readTemplate("view");
-  const content = template.replace(/\{\{NAME\}\}/g, name).replace(/\{\{NAMEPASCAL\}\}/g, toPascal(name));
-  writeFileSync(resolve(v1Dir, `${toPascal(name)}.tsx`), content);
-  writeFileSync(resolve(v1Dir, `${toPascal(name)}.scss`), `.${name}-view {
+  const content = template.replace(/\{\{NAME\}\}/g, kebab).replace(/\{\{NAMEPASCAL\}\}/g, pascal);
+  writeFileSync(resolve(v1Dir, `${pascal}.tsx`), content);
+  writeFileSync(resolve(v1Dir, `${pascal}.scss`), `.${kebab}-view {
   margin-top: 1rem;
 }
 `);
-  writeFileSync(resolve(baseDir, "index.ts"), `export { ${toPascal(name)} } from './v1/${toPascal(name)}'
+  writeFileSync(resolve(baseDir, "index.ts"), `export { ${pascal} } from './v1/${pascal}'
 `);
-  console.log(`Created view: src/views/${name}`);
+  console.log(`Created view: src/views/${pascal}`);
 }
 function readTemplate(type) {
   const path = resolve(__dirname$1, "../templates/presets", `${type}.txt`);
@@ -352,13 +357,13 @@ export default {
   description: "{{NAMEPASCAL}} app",
   parameters: [
     paramBoolean("enabled", "Enabled", true),
-    paramString("name", "Name", "{{NAME}}"),
+    paramString("name", "Name", "{{NAMEPASCAL}}"),
   ],
 };
 ---FILE---
 import React from "react";
 
-export default function App() {
+export default function {{NAMEPASCAL}}() {
   return <div>{{NAMEPASCAL}} App</div>;
 }
 `;
@@ -383,6 +388,9 @@ export function {{NAMEPASCAL}}() {
 }
 function toPascal(s) {
   return s.replace(/-([a-z])/g, (_, c) => c.toUpperCase()).replace(/^./, (c) => c.toUpperCase());
+}
+function toKebab(s) {
+  return s.replace(/([a-z])([A-Z])/g, "$1-$2").replace(/\s+/g, "-").toLowerCase();
 }
 const args = process.argv.slice(2);
 const cmd = args[0];

@@ -1,2 +1,2 @@
-/** Types specific to the demo app. Import from "@/types/demo". */
+/** Types specific to the Demo app. Import from "@/types/Demo". */
 export {}

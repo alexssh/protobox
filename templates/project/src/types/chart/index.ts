@@ -1,2 +1,2 @@
-/** Types specific to the chart app. Import from "@/types/chart". */
+/** Types specific to the Chart app. Import from "@/types/Chart". */
 export {}

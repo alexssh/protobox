@@ -1,13 +1,13 @@
 import React from 'react'
 import { useProtoParams } from 'protobox/useProtoParams'
 
-import './App.scss'
+import './Demo.scss'
 
 import { DemoView } from '@/views/DemoView/v1/DemoView'
 
 import { AppProvider, useAppContext } from './context'
 
-export default function App() {
+export default function Demo() {
   const params = useProtoParams()
 
   return (

@@ -1,13 +1,13 @@
 import React from 'react'
 import { useProtoParams } from 'protobox/useProtoParams'
 
-import './App.scss'
+import './Chart.scss'
 
 import { ChartView } from '@/views/ChartView/v1/ChartView'
 
 import { AppProvider, useAppContext } from './context'
 
-export default function App() {
+export default function Chart() {
   const params = useProtoParams()
 
   return (
