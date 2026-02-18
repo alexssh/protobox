@@ -15,67 +15,82 @@ function init(_args) {
   cpSync(templateDir, cwd, { recursive: true });
   console.log("Project scaffolded. Run: npm install && pbox build");
 }
-async function build(_args) {
+async function build(args2) {
   const cwd = process.cwd();
   const appsDir = resolve(cwd, "src/apps");
   if (!existsSync(appsDir)) {
     console.error("No src/apps directory. Run pbox init first.");
     process.exit(1);
   }
-  const apps = readdirSync(appsDir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
-  if (apps.length === 0) {
+  const allApps = readdirSync(appsDir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
+  if (allApps.length === 0) {
     console.error("No apps found in src/apps");
+    process.exit(1);
+  }
+  const filter = args2.filter((a) => !a.startsWith("-"));
+  const apps = filter.length > 0 ? allApps.filter((a) => filter.includes(a)) : allApps;
+  if (apps.length === 0) {
+    console.error(`No matching apps found. Available: ${allApps.join(", ")}`);
     process.exit(1);
   }
   const buildDir = resolve(cwd, "build");
   if (!existsSync(buildDir)) mkdirSync(buildDir, { recursive: true });
   for (const app of apps) {
-    const appDir = resolve(appsDir, app);
-    const configPath = resolve(appDir, "config.ts");
-    if (!existsSync(configPath)) {
-      console.warn(`Skipping ${app}: no config.ts`);
-      continue;
-    }
-    const outDir = join(buildDir, app);
-    mkdirSync(outDir, { recursive: true });
-    const meta = extractMetadata(appDir, app);
-    const defaultParams = meta.parameters?.reduce((acc, p) => {
-      acc[p.key] = p.default;
-      return acc;
-    }, {}) ?? {};
-    const tempDir = join(buildDir, ".pbox-temp", app);
-    mkdirSync(tempDir, { recursive: true });
-    cpSync(appDir, tempDir, { recursive: true });
-    writeFileSync(resolve(tempDir, "index.html"), generateAppHtml(app, meta.title, defaultParams));
-    try {
-      const result = spawnSync(
-        "npx",
-        [
-          "vite",
-          "build",
-          "--config",
-          resolve(dirname(fileURLToPath(import.meta.url)), "../vite.project.config.ts"),
-          "--outDir",
-          outDir,
-          "--emptyOutDir",
-          "true"
-        ],
-        {
-          cwd,
-          stdio: "inherit",
-          shell: true,
-          env: { ...process.env, PBOX_APP_NAME: app, PBOX_APP_ROOT: tempDir }
-        }
-      );
-      if (result.status !== 0) process.exit(result.status ?? 1);
-    } finally {
-      rmSync(tempDir, { recursive: true, force: true });
-    }
-    const appIndexHtml = resolve(appDir, "index.html");
-    if (existsSync(appIndexHtml)) rmSync(appIndexHtml);
-    writeFileSync(resolve(outDir, "metadata.json"), JSON.stringify(meta, null, 2));
+    buildApp(cwd, app);
   }
-  console.log(`Built ${apps.length} app(s) in build/`);
+  console.log(`Built ${apps.length} app(s): ${apps.join(", ")}`);
+}
+function buildApp(cwd, appName) {
+  const appsDir = resolve(cwd, "src/apps");
+  const appDir = resolve(appsDir, appName);
+  const buildDir = resolve(cwd, "build");
+  const configPath = resolve(appDir, "config.ts");
+  if (!existsSync(configPath)) {
+    console.warn(`Skipping ${appName}: no config.ts`);
+    return;
+  }
+  if (!existsSync(buildDir)) mkdirSync(buildDir, { recursive: true });
+  const outDir = join(buildDir, appName);
+  mkdirSync(outDir, { recursive: true });
+  const meta = extractMetadata(appDir, appName);
+  const defaultParams = meta.parameters?.reduce((acc, p) => {
+    acc[p.key] = p.default;
+    return acc;
+  }, {}) ?? {};
+  const tempDir = join(buildDir, ".pbox-temp", appName);
+  mkdirSync(tempDir, { recursive: true });
+  cpSync(appDir, tempDir, { recursive: true });
+  writeFileSync(resolve(tempDir, "index.html"), generateAppHtml(appName, meta.title, defaultParams));
+  try {
+    const result = spawnSync(
+      "npx",
+      [
+        "vite",
+        "build",
+        "--config",
+        resolve(dirname(fileURLToPath(import.meta.url)), "../vite.project.config.ts"),
+        "--outDir",
+        outDir,
+        "--emptyOutDir",
+        "true"
+      ],
+      {
+        cwd,
+        stdio: "inherit",
+        shell: true,
+        env: { ...process.env, PBOX_APP_NAME: appName, PBOX_APP_ROOT: tempDir }
+      }
+    );
+    if (result.status !== 0) {
+      console.error(`Build failed for ${appName}`);
+      return;
+    }
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+  const appIndexHtml = resolve(appDir, "index.html");
+  if (existsSync(appIndexHtml)) rmSync(appIndexHtml);
+  writeFileSync(resolve(outDir, "metadata.json"), JSON.stringify(meta, null, 2));
 }
 function extractMetadata(appDir, appName) {
   const configPath = resolve(appDir, "config.ts");
@@ -146,19 +161,121 @@ function parseStringArray(s) {
   }
   return arr;
 }
-async function watch(_args) {
+async function watch(args2) {
   const cwd = process.cwd();
   const srcDir = resolve(cwd, "src");
-  const runBuild = () => build();
-  await runBuild();
-  watch$1(srcDir, { recursive: true }, (event, filename) => {
-    if (filename && !filename.includes("node_modules")) {
-      console.log(`
-[${event}] ${filename}`);
-      runBuild();
+  const appsDir = resolve(cwd, "src/apps");
+  const filterApps = args2.filter((a) => !a.startsWith("-"));
+  if (filterApps.length > 0) {
+    const allApps = existsSync(appsDir) ? readdirSync(appsDir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name) : [];
+    const invalid = filterApps.filter((a) => !allApps.includes(a));
+    if (invalid.length > 0) {
+      console.error(`Unknown app(s): ${invalid.join(", ")}. Available: ${allApps.join(", ")}`);
+      process.exit(1);
     }
+    console.log(`Watching app(s): ${filterApps.join(", ")}`);
+  }
+  await build(filterApps);
+  let debounce = null;
+  const pendingApps = /* @__PURE__ */ new Set();
+  let building = false;
+  async function flush() {
+    if (building || pendingApps.size === 0) return;
+    building = true;
+    const apps = new Set(pendingApps);
+    pendingApps.clear();
+    try {
+      for (const app of apps) {
+        buildApp(cwd, app);
+      }
+      console.log(`Rebuilt: ${[...apps].join(", ")}`);
+    } catch (e) {
+      console.error("Build error:", e);
+    }
+    building = false;
+    if (pendingApps.size > 0) flush();
+  }
+  watch$1(srcDir, { recursive: true }, (_event, filename) => {
+    if (!filename || filename.includes("node_modules")) return;
+    const normalized = filename.replace(/\\/g, "/");
+    const appMatch = normalized.match(/^apps\/([^/]+)/);
+    if (appMatch) {
+      const appName = appMatch[1];
+      if (filterApps.length > 0 && !filterApps.includes(appName)) return;
+      console.log(`  [change] apps/${appName}/ — ${normalized.split("/").pop()}`);
+      pendingApps.add(appName);
+    } else {
+      const affected = findAffectedApps(cwd, normalized, filterApps);
+      const short = normalized.split("/").slice(0, 2).join("/");
+      console.log(`  [change] ${short} → ${affected.length > 0 ? affected.join(", ") : "no dependents"}`);
+      affected.forEach((a) => pendingApps.add(a));
+    }
+    if (debounce) clearTimeout(debounce);
+    debounce = setTimeout(flush, 200);
   });
   console.log("Watching for changes...");
+}
+function getModuleKey(relPath) {
+  const parts = relPath.split("/");
+  if ((parts[0] === "components" || parts[0] === "views") && parts.length > 1) {
+    return `${parts[0]}/${parts[1]}`;
+  }
+  return parts[0];
+}
+function extractAtImports(content) {
+  const imports = [];
+  for (const m of content.matchAll(/from\s+['"]@\/([^'"]+)['"]/g)) {
+    imports.push(m[1]);
+  }
+  return imports;
+}
+function findTsFiles(dir) {
+  if (!existsSync(dir)) return [];
+  const results = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...findTsFiles(full));
+    } else if (/\.(tsx?|jsx?)$/.test(entry.name)) {
+      results.push(full);
+    }
+  }
+  return results;
+}
+function dirImportsAny(dir, modules) {
+  for (const file of findTsFiles(dir)) {
+    const content = readFileSync(file, "utf-8");
+    for (const imp of extractAtImports(content)) {
+      if (modules.has(getModuleKey(imp))) return true;
+    }
+  }
+  return false;
+}
+function findAffectedApps(cwd, changedRelPath, filterApps) {
+  const srcDir = resolve(cwd, "src");
+  const appsDir = resolve(srcDir, "apps");
+  const changedModule = getModuleKey(changedRelPath);
+  const depModules = /* @__PURE__ */ new Set([changedModule]);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const dir of ["components", "views"]) {
+      const baseDir = resolve(srcDir, dir);
+      if (!existsSync(baseDir)) continue;
+      for (const entry of readdirSync(baseDir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        const key = `${dir}/${entry.name}`;
+        if (depModules.has(key)) continue;
+        if (dirImportsAny(resolve(baseDir, entry.name), depModules)) {
+          depModules.add(key);
+          grew = true;
+        }
+      }
+    }
+  }
+  const allApps = readdirSync(appsDir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
+  const scope = filterApps.length > 0 ? allApps.filter((a) => filterApps.includes(a)) : allApps;
+  return scope.filter((app) => dirImportsAny(resolve(appsDir, app), depModules));
 }
 const __dirname$2 = dirname(fileURLToPath(import.meta.url));
 const PORT = 5174;
@@ -166,6 +283,7 @@ async function run(_args) {
   const cwd = process.cwd();
   const pboxRoot = resolve(__dirname$2, "..");
   const previewDir = resolve(pboxRoot, "dist/preview");
+  const buildDir = resolve(cwd, "build");
   if (!existsSync(resolve(previewDir, "index.html"))) {
     console.error("Preview not built. Run: npm run build (from protobox package)");
     process.exit(1);
@@ -177,13 +295,42 @@ async function run(_args) {
     ".json": "application/json",
     ".ico": "image/x-icon"
   };
+  const sseClients = /* @__PURE__ */ new Set();
+  let reloadTimer = null;
+  function notifyReload() {
+    if (reloadTimer) clearTimeout(reloadTimer);
+    reloadTimer = setTimeout(() => {
+      for (const client of sseClients) {
+        client.write("data: reload\n\n");
+      }
+    }, 300);
+  }
+  if (existsSync(buildDir)) {
+    watch$1(buildDir, { recursive: true }, () => notifyReload());
+  }
+  watch$1(cwd, (_, filename) => {
+    if (filename === "build" && existsSync(buildDir)) {
+      watch$1(buildDir, { recursive: true }, () => notifyReload());
+      notifyReload();
+    }
+  });
   const server = createServer((req, res) => {
     let path = req.url ?? "/";
     const q = path.indexOf("?");
     if (q >= 0) path = path.slice(0, q);
     if (path === "/") path = "/index.html";
+    if (path === "/api/events") {
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive"
+      });
+      res.write("data: connected\n\n");
+      sseClients.add(res);
+      req.on("close", () => sseClients.delete(res));
+      return;
+    }
     if (path === "/api/apps") {
-      const buildDir = resolve(cwd, "build");
       if (!existsSync(buildDir)) {
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify([]));
@@ -203,7 +350,6 @@ async function run(_args) {
     }
     if (path.startsWith("/apps/")) {
       const rel = path.slice(6);
-      const buildDir = resolve(cwd, "build");
       const filePath2 = resolve(buildDir, rel);
       if (existsSync(filePath2)) {
         const ext = extname(filePath2);
@@ -411,12 +557,18 @@ Usage: pbox <command> [options]
 
 Commands:
   init              Scaffold a new project
-  build             Build all apps
-  watch             Build and watch for changes
+  build [App...]    Build apps (all if no args)
+  watch [App...]    Watch & rebuild (all if no args)
   run               Start preview server
   add app           Add a new app
   add component     Add a new component
   add view          Add a new view
+
+Examples:
+  pbox build                Build all apps
+  pbox build Chart          Build only Chart
+  pbox watch Lists          Watch & rebuild only Lists
+  pbox watch Chart Lists    Watch & rebuild Chart and Lists
 `);
     process.exit(1);
   }

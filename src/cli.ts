@@ -27,12 +27,18 @@ Usage: pbox <command> [options]
 
 Commands:
   init              Scaffold a new project
-  build             Build all apps
-  watch             Build and watch for changes
+  build [App...]    Build apps (all if no args)
+  watch [App...]    Watch & rebuild (all if no args)
   run               Start preview server
   add app           Add a new app
   add component     Add a new component
   add view          Add a new view
+
+Examples:
+  pbox build                Build all apps
+  pbox build Chart          Build only Chart
+  pbox watch Lists          Watch & rebuild only Lists
+  pbox watch Chart Lists    Watch & rebuild Chart and Lists
 `)
     process.exit(1)
   }

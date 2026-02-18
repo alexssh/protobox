@@ -1,5 +1,5 @@
-import { createServer } from 'http'
-import { readFileSync, existsSync, readdirSync } from 'fs'
+import { createServer, type ServerResponse } from 'http'
+import { readFileSync, existsSync, readdirSync, watch as fsWatch } from 'fs'
 import { resolve, join, extname, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { spawn } from 'child_process'
@@ -11,6 +11,7 @@ export async function run(_args: string[]) {
   const cwd = process.cwd()
   const pboxRoot = resolve(__dirname, '..')
   const previewDir = resolve(pboxRoot, 'dist/preview')
+  const buildDir = resolve(cwd, 'build')
 
   if (!existsSync(resolve(previewDir, 'index.html'))) {
     console.error('Preview not built. Run: npm run build (from protobox package)')
@@ -25,14 +26,48 @@ export async function run(_args: string[]) {
     '.ico': 'image/x-icon',
   }
 
+  const sseClients = new Set<ServerResponse>()
+  let reloadTimer: ReturnType<typeof setTimeout> | null = null
+
+  function notifyReload() {
+    if (reloadTimer) clearTimeout(reloadTimer)
+    reloadTimer = setTimeout(() => {
+      for (const client of sseClients) {
+        client.write('data: reload\n\n')
+      }
+    }, 300)
+  }
+
+  if (existsSync(buildDir)) {
+    fsWatch(buildDir, { recursive: true }, () => notifyReload())
+  }
+  fsWatch(cwd, (_, filename) => {
+    if (filename === 'build' && existsSync(buildDir)) {
+      fsWatch(buildDir, { recursive: true }, () => notifyReload())
+      notifyReload()
+    }
+  })
+
   const server = createServer((req, res) => {
     let path = req.url ?? '/'
     const q = path.indexOf('?')
     if (q >= 0) path = path.slice(0, q)
 
     if (path === '/') path = '/index.html'
+
+    if (path === '/api/events') {
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      })
+      res.write('data: connected\n\n')
+      sseClients.add(res)
+      req.on('close', () => sseClients.delete(res))
+      return
+    }
+
     if (path === '/api/apps') {
-      const buildDir = resolve(cwd, 'build')
       if (!existsSync(buildDir)) {
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify([]))
@@ -55,7 +90,6 @@ export async function run(_args: string[]) {
 
     if (path.startsWith('/apps/')) {
       const rel = path.slice(6)
-      const buildDir = resolve(cwd, 'build')
       const filePath = resolve(buildDir, rel)
       if (existsSync(filePath)) {
         const ext = extname(filePath)

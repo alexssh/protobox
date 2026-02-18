@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+
+const STORAGE_KEY = 'pbox-selected-app'
 
 interface AppMeta {
   appName: string
@@ -20,29 +22,58 @@ export default function App() {
   const [selected, setSelected] = useState<string>('')
   const [params, setParams] = useState<Record<string, unknown>>({})
   const [loading, setLoading] = useState(true)
+  const [reloadKey, setReloadKey] = useState(0)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  const sendParams = useCallback(() => {
+    const w = iframeRef.current?.contentWindow
+    if (w) w.postMessage({ type: 'pbox-params', params }, '*')
+  }, [params])
+
+  const fetchApps = useCallback((): Promise<AppMeta[]> => {
+    return fetch('/api/apps')
+      .then((r) => r.json())
+      .then((data: AppMeta[]) => {
+        setApps(data)
+        return data
+      })
+  }, [])
 
   useEffect(() => {
-    fetch('/api/apps')
-      .then((r) => r.json())
+    fetchApps()
       .then((data) => {
-        setApps(data)
-        if (data.length > 0) {
+        const saved = localStorage.getItem(STORAGE_KEY)
+        const validApp = data.find((a) => a.appName === saved)
+        if (validApp) {
+          setSelected(saved!)
+          setParams(extractDefaults(validApp))
+        } else if (data.length > 0) {
           setSelected(data[0].appName)
           setParams(extractDefaults(data[0]))
         }
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [])
+  }, [fetchApps])
 
   useEffect(() => {
-    if (selected && params) {
-      const iframe = document.getElementById('app-frame') as HTMLIFrameElement
-      if (iframe?.contentWindow) {
-        iframe.contentWindow.postMessage({ type: 'pbox-params', params }, '*')
+    if (selected) localStorage.setItem(STORAGE_KEY, selected)
+  }, [selected])
+
+  useEffect(() => {
+    sendParams()
+  }, [sendParams])
+
+  useEffect(() => {
+    const es = new EventSource('/api/events')
+    es.onmessage = (e) => {
+      if (e.data === 'reload') {
+        fetchApps()
+        setReloadKey((k) => k + 1)
       }
     }
-  }, [selected, params])
+    return () => es.close()
+  }, [fetchApps])
 
   if (loading) return <div className="pbox-loading">Loading apps...</div>
   if (apps.length === 0) return <div className="pbox-empty">No apps in build/. Run pbox build.</div>
@@ -81,11 +112,13 @@ export default function App() {
       </aside>
       <main className="pbox-main">
         <iframe
+          ref={iframeRef}
           id="app-frame"
-          key={selected}
+          key={`${selected}-${reloadKey}`}
           src={`/apps/${selected}/index.html`}
           title={currentApp?.title}
           className="pbox-iframe"
+          onLoad={sendParams}
         />
       </main>
     </div>
@@ -134,7 +167,7 @@ function ParamControl({ param, value, onChange }: { param: ParameterMeta; value:
     )
   }
 
-  if (param.type === 'paramoption' || param.type === 'option') {
+  if (param.type === 'option') {
     const opts = param.options ?? []
     return (
       <label className="pbox-param">
@@ -150,7 +183,7 @@ function ParamControl({ param, value, onChange }: { param: ParameterMeta; value:
     )
   }
 
-  if (param.type === 'paramoptionmulti' || param.type === 'option-multi') {
+  if (param.type === 'option-multi') {
     const opts = param.options ?? []
     const arr = (Array.isArray(value) ? value : []) as string[]
     return (

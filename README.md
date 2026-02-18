@@ -12,21 +12,26 @@ React 18 + TypeScript prototyping framework for rapid project development.
 ## CLI
 
 ```bash
-pbox init             # scaffold project
-pbox build            # build all apps
-pbox watch            # build + watch
-pbox run              # start preview server (or npm run server)
-pbox add app Chart    # add app  → src/apps/Chart/
-pbox add component Card  # add component → src/components/Card/v1/
-pbox add view Dashboard  # add view → src/views/Dashboard/v1/
+pbox init                  # scaffold project
+pbox build                 # build all apps
+pbox build Chart           # build only Chart
+pbox build Chart Lists     # build Chart and Lists
+pbox watch                 # watch + rebuild all apps
+pbox watch Chart           # watch + rebuild only Chart
+pbox watch Chart Lists     # watch + rebuild Chart and Lists
+pbox run                   # start preview server with live reload
+pbox add app Chart         # add app  → src/apps/Chart/
+pbox add component Card    # add component → src/components/Card/v1/
+pbox add view Dashboard    # add view → src/views/Dashboard/v1/
 ```
 
 ## Preview
 
 - Lists apps from `build/`
-- Switch between apps via dropdown
+- Switch between apps via dropdown; selection persists in localStorage
 - Parameter UI (boolean, number, string, option, option-multi) from app config
 - Renders each app in an iframe; passes parameters via `postMessage`
+- **Live reload**: `pbox run` watches `build/` and auto-reloads iframe via SSE when files change
 - Apps use `useProtoParams()` from `protobox/useProtoParams` for default + live params
 
 ## Project Architecture
@@ -108,7 +113,8 @@ Use hard-coded versioned paths: `import { X } from "@/components/Card/v1/Card"` 
 3. `pbox add view MyView` → new view (`src/views/MyView/v1/`)
 4. `pbox add component Button` → new component (`src/components/Button/v1/`)
 5. Edit `config.ts`, `MyApp.tsx`
-6. `npm run watch` + `npm run server` → iterate
+6. `npm run watch` + `npm run server` → iterate (live reload)
+7. `npx pbox watch MyApp` → watch only MyApp for faster rebuilds
 
 ## Framework
 
@@ -130,6 +136,14 @@ templates/
 - CLI, libs, preview build separately
 - Import `protobox/context` → only context code (tree-shaking)
 - Preview never imports project code; loads built apps only
+
+### Smart Watch
+
+- `pbox watch` detects which app was changed and rebuilds only that app
+- Changes in `src/apps/Chart/` → rebuild only Chart
+- Changes in `src/components/`, `src/views/`, `src/types/` → rebuild all apps (shared code)
+- `pbox watch Chart` → watch only Chart; ignore changes to other apps
+- Debounced (200ms) to batch rapid file changes into a single rebuild
 
 ### Extension
 
