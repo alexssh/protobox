@@ -12,6 +12,11 @@ export default defineConfig({
   base: './',
   root: appRoot,
   publicDir: false,
+  css: {
+    preprocessorOptions: {
+      scss: { api: 'modern' },
+    },
+  },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react/jsx-runtime'],
   },

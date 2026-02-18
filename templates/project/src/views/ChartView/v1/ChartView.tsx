@@ -1,40 +1,30 @@
 import React from 'react'
+import { bem } from 'protobox/bem'
 
 import './ChartView.scss'
 
 import { Card } from '@/components/Card/v2/Card'
 
-import { chartData } from '@/data'
+import { defaultData, type ChartViewData } from './ChartViewData'
+
+const b = bem.bind(null, 'Chart-view')
 
 interface ChartViewProps {
-  useAppContext: () => {
-    state: { count: number; label: string }
-    update: (fn: (d: { count: number }) => void) => void
-  }
+  data?: ChartViewData
 }
 
-export function ChartView({ useAppContext }: ChartViewProps) {
-  const { state, update } = useAppContext()
-
+export function ChartView({ data = defaultData }: ChartViewProps) {
   return (
-    <div className="chart-view">
+    <div className={b()}>
       <Card title="Context + update() + data">
         <p>
-          Shared state: count={state.count}, label=&quot;{state.label}&quot;
+          Shared state: count={data.count}, label=&quot;{data.label}&quot;
         </p>
-        <button
-          type="button"
-          className="chart-view__btn"
-          onClick={() =>
-            update((draft) => {
-              draft.count += 1
-            })
-          }
-        >
+        <button type="button" className={b('btn')} onClick={data.onAdd}>
           Add
         </button>
-        <ul className="chart-view__data">
-          {chartData.map((d, i) => (
+        <ul className={b('data')}>
+          {data.chartData.map((d, i) => (
             <li key={i}>
               {d.x}: {d.y}
             </li>

@@ -1,11 +1,23 @@
-import React from 'react'
-
-import './{{NAMEPASCAL}}.scss'
-
-interface {{NAMEPASCAL}}Props {
+---FILE---
+export interface {{NAMEPASCAL}}Data {
   children?: React.ReactNode
 }
 
-export function {{NAMEPASCAL}}({ children }: {{NAMEPASCAL}}Props) {
-  return <div className="{{NAME}}-view">{children}</div>
+export const defaultData: {{NAMEPASCAL}}Data = {}
+---FILE---
+import React from 'react'
+import { bem } from 'protobox/bem'
+
+import './{{NAMEPASCAL}}.scss'
+
+import { defaultData, type {{NAMEPASCAL}}Data } from './{{NAMEPASCAL}}Data'
+
+const b = bem.bind(null, '{{NAME}}-view')
+
+interface {{NAMEPASCAL}}Props {
+  data?: {{NAMEPASCAL}}Data
+}
+
+export function {{NAMEPASCAL}}({ data = defaultData }: {{NAMEPASCAL}}Props) {
+  return <div className={b()}>{data.children}</div>
 }

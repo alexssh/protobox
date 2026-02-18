@@ -91,9 +91,18 @@ function addView(cwd: string, name: string) {
   mkdirSync(v1Dir, { recursive: true })
 
   const template = readTemplate('view')
-  const content = template.replace(/\{\{NAME\}\}/g, kebab).replace(/\{\{NAMEPASCAL\}\}/g, pascal)
+  const files = template.replace(/\{\{NAME\}\}/g, kebab).replace(/\{\{NAMEPASCAL\}\}/g, pascal)
 
-  writeFileSync(resolve(v1Dir, `${pascal}.tsx`), content)
+  const parts = files.split('---FILE---')
+  if (parts.length >= 3) {
+    const dataTs = parts[1]?.trim() ?? ''
+    const viewTsx = parts[2]?.trim() ?? ''
+    writeFileSync(resolve(v1Dir, `${pascal}Data.ts`), dataTs)
+    writeFileSync(resolve(v1Dir, `${pascal}.tsx`), viewTsx)
+  } else {
+    writeFileSync(resolve(v1Dir, `${pascal}.tsx`), files.trim())
+  }
+
   writeFileSync(resolve(v1Dir, `${pascal}.scss`), `.${kebab}-view {\n  margin-top: 1rem;\n}\n`)
   writeFileSync(resolve(baseDir, 'index.ts'), `export { ${pascal} } from './v1/${pascal}'\n`)
   console.log(`Created view: src/views/${pascal}`)
@@ -120,25 +129,47 @@ export default {
 };
 ---FILE---
 import React from "react";
+import { bem } from "protobox/bem";
+
+const b = bem.bind(null, "{{NAME}}-app");
 
 export default function {{NAMEPASCAL}}() {
-  return <div>{{NAMEPASCAL}} App</div>;
+  return <div className={b()}>{{NAMEPASCAL}} App</div>;
 }
 `
   }
   if (type === 'component') {
     return `import React from "react";
+import { bem } from "protobox/bem";
+
+const b = bem.bind(null, "{{NAME}}");
 
 export function {{NAMEPASCAL}}() {
-  return <div>{{NAMEPASCAL}}</div>;
+  return <div className={b()}>{{NAMEPASCAL}}</div>;
 }
 `
   }
   if (type === 'view') {
-    return `import React from "react";
+    return `---FILE---
+export interface {{NAMEPASCAL}}Data {
+  children?: React.ReactNode;
+}
 
-export function {{NAMEPASCAL}}() {
-  return <div>{{NAMEPASCAL}} View</div>;
+export const defaultData: {{NAMEPASCAL}}Data = {};
+---FILE---
+import React from "react";
+import { bem } from "protobox/bem";
+
+import { defaultData, type {{NAMEPASCAL}}Data } from "./{{NAMEPASCAL}}Data";
+
+const b = bem.bind(null, "{{NAME}}-view");
+
+interface {{NAMEPASCAL}}Props {
+  data?: {{NAMEPASCAL}}Data;
+}
+
+export function {{NAMEPASCAL}}({ data = defaultData }: {{NAMEPASCAL}}Props) {
+  return <div className={b()}>{data.children}</div>;
 }
 `
   }

@@ -35,10 +35,13 @@ async function build(args2) {
   }
   const buildDir = resolve(cwd, "build");
   if (!existsSync(buildDir)) mkdirSync(buildDir, { recursive: true });
+  const start = Date.now();
   for (const app of apps) {
     buildApp(cwd, app);
   }
-  console.log(`Built ${apps.length} app(s): ${apps.join(", ")}`);
+  const ms = Date.now() - start;
+  const ts = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-GB", { hour12: false });
+  console.log(`${ts} [${apps.join(", ")}] built (${ms}ms)`);
 }
 function buildApp(cwd, appName) {
   const appsDir = resolve(cwd, "src/apps");
@@ -76,12 +79,14 @@ function buildApp(cwd, appName) {
       ],
       {
         cwd,
-        stdio: "inherit",
+        stdio: "pipe",
         shell: true,
         env: { ...process.env, PBOX_APP_NAME: appName, PBOX_APP_ROOT: tempDir }
       }
     );
     if (result.status !== 0) {
+      const stderr = result.stderr?.toString().trim();
+      if (stderr) console.error(stderr);
       console.error(`Build failed for ${appName}`);
       return;
     }
@@ -105,30 +110,27 @@ function extractMetadata(appDir, appName) {
   };
 }
 function parseParametersFromSource(content) {
-  const params = [];
+  const indexed = [];
   for (const m of content.matchAll(/paramBoolean\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)["']\s*,\s*(true|false)\s*\)/g)) {
-    params.push({ type: "boolean", key: m[1], label: m[2], default: m[3] === "true" });
+    indexed.push({ index: m.index, param: { type: "boolean", key: m[1], label: m[2], default: m[3] === "true" } });
   }
   for (const m of content.matchAll(/paramNumber\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)["']\s*,\s*(\d+(?:\.\d+)?)/g)) {
-    params.push({ type: "number", key: m[1], label: m[2], default: parseFloat(m[3]) });
+    indexed.push({ index: m.index, param: { type: "number", key: m[1], label: m[2], default: parseFloat(m[3]) } });
   }
   for (const m of content.matchAll(/paramString\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)["']\s*,\s*["']([^"']*)["']\s*\)/g)) {
-    params.push({ type: "string", key: m[1], label: m[2], default: m[3] });
+    indexed.push({ index: m.index, param: { type: "string", key: m[1], label: m[2], default: m[3] } });
   }
   for (const m of content.matchAll(
     /paramOption\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)["']\s*,\s*["']([^"']*)["']\s*,\s*\[([\s\S]*?)\]\s*\)/g
   )) {
-    const opts = parseOptionsArray(m[4]);
-    params.push({ type: "option", key: m[1], label: m[2], default: m[3], options: opts });
+    indexed.push({ index: m.index, param: { type: "option", key: m[1], label: m[2], default: m[3], options: parseOptionsArray(m[4]) } });
   }
   for (const m of content.matchAll(
     /paramOptionMulti\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)["']\s*,\s*\[([\s\S]*?)\]\s*,\s*\[([\s\S]*?)\]\s*\)/g
   )) {
-    const opts = parseOptionsArray(m[4]);
-    const defaultArr = parseStringArray(m[3]);
-    params.push({ type: "option-multi", key: m[1], label: m[2], default: defaultArr, options: opts });
+    indexed.push({ index: m.index, param: { type: "option-multi", key: m[1], label: m[2], default: parseStringArray(m[3]), options: parseOptionsArray(m[4]) } });
   }
-  return params;
+  return indexed.sort((a, b) => a.index - b.index).map((e) => e.param);
 }
 function parseOptionsArray(s) {
   const opts = [];
@@ -179,16 +181,21 @@ async function watch(args2) {
   let debounce = null;
   const pendingApps = /* @__PURE__ */ new Set();
   let building = false;
+  let lastTrigger = "";
   async function flush() {
     if (building || pendingApps.size === 0) return;
     building = true;
     const apps = new Set(pendingApps);
     pendingApps.clear();
+    const start = Date.now();
     try {
       for (const app of apps) {
         buildApp(cwd, app);
       }
-      console.log(`Rebuilt: ${[...apps].join(", ")}`);
+      const ms = Date.now() - start;
+      const ts = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-GB", { hour12: false });
+      const trigger = lastTrigger ? ` ${lastTrigger} →` : "";
+      console.log(`${ts}${trigger} [${[...apps].join(", ")}] rebuilt (${ms}ms)`);
     } catch (e) {
       console.error("Build error:", e);
     }
@@ -202,12 +209,11 @@ async function watch(args2) {
     if (appMatch) {
       const appName = appMatch[1];
       if (filterApps.length > 0 && !filterApps.includes(appName)) return;
-      console.log(`  [change] apps/${appName}/ — ${normalized.split("/").pop()}`);
+      lastTrigger = `apps/${appName}/${normalized.split("/").pop()}`;
       pendingApps.add(appName);
     } else {
       const affected = findAffectedApps(cwd, normalized, filterApps);
-      const short = normalized.split("/").slice(0, 2).join("/");
-      console.log(`  [change] ${short} → ${affected.length > 0 ? affected.join(", ") : "no dependents"}`);
+      lastTrigger = normalized.split("/").slice(0, 2).join("/");
       affected.forEach((a) => pendingApps.add(a));
     }
     if (debounce) clearTimeout(debounce);
@@ -478,8 +484,16 @@ function addView(cwd, name) {
   const v1Dir = resolve(baseDir, "v1");
   mkdirSync(v1Dir, { recursive: true });
   const template = readTemplate("view");
-  const content = template.replace(/\{\{NAME\}\}/g, kebab).replace(/\{\{NAMEPASCAL\}\}/g, pascal);
-  writeFileSync(resolve(v1Dir, `${pascal}.tsx`), content);
+  const files = template.replace(/\{\{NAME\}\}/g, kebab).replace(/\{\{NAMEPASCAL\}\}/g, pascal);
+  const parts = files.split("---FILE---");
+  if (parts.length >= 3) {
+    const dataTs = parts[1]?.trim() ?? "";
+    const viewTsx = parts[2]?.trim() ?? "";
+    writeFileSync(resolve(v1Dir, `${pascal}Data.ts`), dataTs);
+    writeFileSync(resolve(v1Dir, `${pascal}.tsx`), viewTsx);
+  } else {
+    writeFileSync(resolve(v1Dir, `${pascal}.tsx`), files.trim());
+  }
   writeFileSync(resolve(v1Dir, `${pascal}.scss`), `.${kebab}-view {
   margin-top: 1rem;
 }
@@ -508,25 +522,47 @@ export default {
 };
 ---FILE---
 import React from "react";
+import { bem } from "protobox/bem";
+
+const b = bem.bind(null, "{{NAME}}-app");
 
 export default function {{NAMEPASCAL}}() {
-  return <div>{{NAMEPASCAL}} App</div>;
+  return <div className={b()}>{{NAMEPASCAL}} App</div>;
 }
 `;
   }
   if (type === "component") {
     return `import React from "react";
+import { bem } from "protobox/bem";
+
+const b = bem.bind(null, "{{NAME}}");
 
 export function {{NAMEPASCAL}}() {
-  return <div>{{NAMEPASCAL}}</div>;
+  return <div className={b()}>{{NAMEPASCAL}}</div>;
 }
 `;
   }
   if (type === "view") {
-    return `import React from "react";
+    return `---FILE---
+export interface {{NAMEPASCAL}}Data {
+  children?: React.ReactNode;
+}
 
-export function {{NAMEPASCAL}}() {
-  return <div>{{NAMEPASCAL}} View</div>;
+export const defaultData: {{NAMEPASCAL}}Data = {};
+---FILE---
+import React from "react";
+import { bem } from "protobox/bem";
+
+import { defaultData, type {{NAMEPASCAL}}Data } from "./{{NAMEPASCAL}}Data";
+
+const b = bem.bind(null, "{{NAME}}-view");
+
+interface {{NAMEPASCAL}}Props {
+  data?: {{NAMEPASCAL}}Data;
+}
+
+export function {{NAMEPASCAL}}({ data = defaultData }: {{NAMEPASCAL}}Props) {
+  return <div className={b()}>{data.children}</div>;
 }
 `;
   }

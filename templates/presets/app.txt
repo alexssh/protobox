@@ -12,15 +12,18 @@ export default {
 ---FILE---
 import React from 'react'
 import { useProtoParams } from 'protobox/useProtoParams'
+import { bem } from 'protobox/bem'
 
 import './{{NAMEPASCAL}}.scss'
+
+const b = bem.bind(null, '{{NAME}}-app')
 
 export default function {{NAMEPASCAL}}() {
   const params = useProtoParams()
   return (
-    <div className="{{NAME}}-app">
-      <h1 className="{{NAME}}-app__title">{{NAMEPASCAL}} App</h1>
-      <pre className="{{NAME}}-app__params">{JSON.stringify(params, null, 2)}</pre>
+    <div className={b()}>
+      <h1 className={b('title')}>{{NAMEPASCAL}} App</h1>
+      <pre className={b('params')}>{JSON.stringify(params, null, 2)}</pre>
     </div>
   )
 }

@@ -12,9 +12,9 @@ alwaysApply: false
 src/
   apps/       # PascalCase dirs: App.tsx → Name.tsx, Name.scss, main.tsx, config.ts, context.tsx
   components/ # Name/v1/Name.tsx + Name.scss; use v1, v2 for versions
-  views/      # Name/v1/Name.tsx + Name.scss; one view per app
-  data/       # Shared data
-  @types/      # _global/ (all apps), {{AppName}}/ (per-app, PascalCase)
+  views/      # Name/v1/Name.tsx + Name.scss + NameData.ts; one view per app
+  static/     # Shared static/mock data (import via @/static)
+  @types/     # _global/ (all apps), {{AppName}}/ (per-app, PascalCase)
 ```
 
 ## Naming
@@ -22,7 +22,7 @@ src/
 - All entity directories (apps, components, views, types) use **PascalCase**: `Chart`, `DemoView`, `Card`.
 - App files are named after the app: `Chart.tsx`, `Chart.scss` (not `App.tsx`).
 - Component/view files are named after the entity: `Card.tsx`, `ChartView.tsx`.
-- CSS classes use **kebab-case**: `.chart-app`, `.card--v1`, `.demo-view`.
+- CSS classes use **BEM kebab-case**: `.chart-app`, `.card_version-v1`, `.demo-view`. Use `bem()` from `protobox/bem` for root `className`; naming: `Block__element_modifier-value`.
 - `main.tsx` and `config.ts` keep their generic names (entry point and config).
 
 ## Apps
@@ -45,9 +45,19 @@ paramOptionMulti("key", "Label", [], [{ value, label }])
 
 Parameters are only for apps. Components and views do not have parameters or config files.
 
+## View Data Layer
+
+Each view has a `{ViewName}Data.ts` file alongside it (e.g., `DemoView/v1/DemoViewData.ts`):
+
+- Exports `defaultData` (static defaults so the view works standalone), a `Data` type, and an optional `use{ViewName}Data()` hook.
+- The hook accepts a context hook and returns wired-up data with callbacks.
+- Views are pure presentation: accept `data` prop with a default, no hooks or context calls inside.
+- Apps wire data by calling the hook and passing the result to the view.
+
 ## Imports
 
 - Use hard-coded versioned paths: `import { Card } from '@/components/Card/v1/Card'`.
+- Static/mock data: `import { ... } from '@/static'`.
 - One view per app. Always define an interface for components and views.
 
 ## Context

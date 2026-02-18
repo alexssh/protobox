@@ -32,11 +32,14 @@ export async function build(args: string[]) {
   const buildDir = resolve(cwd, 'build')
   if (!existsSync(buildDir)) mkdirSync(buildDir, { recursive: true })
 
+  const start = Date.now()
   for (const app of apps) {
     buildApp(cwd, app)
   }
+  const ms = Date.now() - start
 
-  console.log(`Built ${apps.length} app(s): ${apps.join(', ')}`)
+  const ts = new Date().toLocaleTimeString('en-GB', { hour12: false })
+  console.log(`${ts} [${apps.join(', ')}] built (${ms}ms)`)
 }
 
 export function buildApp(cwd: string, appName: string) {
@@ -82,13 +85,15 @@ export function buildApp(cwd: string, appName: string) {
       ],
       {
         cwd,
-        stdio: 'inherit',
+        stdio: 'pipe',
         shell: true,
         env: { ...process.env, PBOX_APP_NAME: appName, PBOX_APP_ROOT: tempDir },
       },
     )
 
     if (result.status !== 0) {
+      const stderr = result.stderr?.toString().trim()
+      if (stderr) console.error(stderr)
       console.error(`Build failed for ${appName}`)
       return
     }
@@ -118,32 +123,29 @@ function extractMetadata(appDir: string, appName: string): Record<string, unknow
 }
 
 function parseParametersFromSource(content: string): unknown[] {
-  const params: unknown[] = []
+  const indexed: Array<{ index: number; param: Record<string, unknown> }> = []
 
   for (const m of content.matchAll(/paramBoolean\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)["']\s*,\s*(true|false)\s*\)/g)) {
-    params.push({ type: 'boolean', key: m[1], label: m[2], default: m[3] === 'true' })
+    indexed.push({ index: m.index!, param: { type: 'boolean', key: m[1], label: m[2], default: m[3] === 'true' } })
   }
   for (const m of content.matchAll(/paramNumber\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)["']\s*,\s*(\d+(?:\.\d+)?)/g)) {
-    params.push({ type: 'number', key: m[1], label: m[2], default: parseFloat(m[3]) })
+    indexed.push({ index: m.index!, param: { type: 'number', key: m[1], label: m[2], default: parseFloat(m[3] as string) } })
   }
   for (const m of content.matchAll(/paramString\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)["']\s*,\s*["']([^"']*)["']\s*\)/g)) {
-    params.push({ type: 'string', key: m[1], label: m[2], default: m[3] })
+    indexed.push({ index: m.index!, param: { type: 'string', key: m[1], label: m[2], default: m[3] } })
   }
   for (const m of content.matchAll(
     /paramOption\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)["']\s*,\s*["']([^"']*)["']\s*,\s*\[([\s\S]*?)\]\s*\)/g,
   )) {
-    const opts = parseOptionsArray(m[4])
-    params.push({ type: 'option', key: m[1], label: m[2], default: m[3], options: opts })
+    indexed.push({ index: m.index!, param: { type: 'option', key: m[1], label: m[2], default: m[3], options: parseOptionsArray(m[4]) } })
   }
   for (const m of content.matchAll(
     /paramOptionMulti\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']*)["']\s*,\s*\[([\s\S]*?)\]\s*,\s*\[([\s\S]*?)\]\s*\)/g,
   )) {
-    const opts = parseOptionsArray(m[4])
-    const defaultArr = parseStringArray(m[3])
-    params.push({ type: 'option-multi', key: m[1], label: m[2], default: defaultArr, options: opts })
+    indexed.push({ index: m.index!, param: { type: 'option-multi', key: m[1], label: m[2], default: parseStringArray(m[3]), options: parseOptionsArray(m[4]) } })
   }
 
-  return params
+  return indexed.sort((a, b) => a.index - b.index).map((e) => e.param)
 }
 
 function parseOptionsArray(s: string): Array<{ value: string; label: string }> {

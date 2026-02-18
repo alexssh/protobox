@@ -29,6 +29,8 @@ export async function watch(args: string[]) {
   const pendingApps = new Set<string>()
   let building = false
 
+  let lastTrigger = ''
+
   async function flush() {
     if (building || pendingApps.size === 0) return
     building = true
@@ -36,11 +38,15 @@ export async function watch(args: string[]) {
     const apps = new Set(pendingApps)
     pendingApps.clear()
 
+    const start = Date.now()
     try {
       for (const app of apps) {
         buildApp(cwd, app)
       }
-      console.log(`Rebuilt: ${[...apps].join(', ')}`)
+      const ms = Date.now() - start
+      const ts = new Date().toLocaleTimeString('en-GB', { hour12: false })
+      const trigger = lastTrigger ? ` ${lastTrigger} →` : ''
+      console.log(`${ts}${trigger} [${[...apps].join(', ')}] rebuilt (${ms}ms)`)
     } catch (e) {
       console.error('Build error:', e)
     }
@@ -58,12 +64,11 @@ export async function watch(args: string[]) {
     if (appMatch) {
       const appName = appMatch[1]
       if (filterApps.length > 0 && !filterApps.includes(appName)) return
-      console.log(`  [change] apps/${appName}/ — ${normalized.split('/').pop()}`)
+      lastTrigger = `apps/${appName}/${normalized.split('/').pop()}`
       pendingApps.add(appName)
     } else {
       const affected = findAffectedApps(cwd, normalized, filterApps)
-      const short = normalized.split('/').slice(0, 2).join('/')
-      console.log(`  [change] ${short} → ${affected.length > 0 ? affected.join(', ') : 'no dependents'}`)
+      lastTrigger = normalized.split('/').slice(0, 2).join('/')
       affected.forEach((a) => pendingApps.add(a))
     }
 
