@@ -1,15 +1,18 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import { readdirSync } from "fs";
+
+const libsDir = resolve(__dirname, "src/libs");
+const entry = Object.fromEntries(
+  readdirSync(libsDir)
+    .filter((f) => /\.(ts|tsx)$/.test(f))
+    .map((f) => [f.replace(/\.(ts|tsx)$/, ""), resolve(libsDir, f)]),
+);
 
 export default defineConfig({
   build: {
     lib: {
-      entry: {
-        index: resolve(__dirname, "src/libs/index.ts"),
-        context: resolve(__dirname, "src/libs/context.tsx"),
-        parameters: resolve(__dirname, "src/libs/parameters.ts"),
-        useProtoParams: resolve(__dirname, "src/libs/useProtoParams.ts"),
-      },
+      entry,
       formats: ["es"],
     },
     outDir: "dist/libs",

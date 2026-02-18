@@ -26,9 +26,7 @@ export default defineConfig({
   },
   resolve: {
     alias: [
-      { find: 'protobox/useProtoParams', replacement: resolve(protoboxRoot, 'dist/libs/useProtoParams.js') },
-      { find: 'protobox/context', replacement: resolve(protoboxRoot, 'dist/libs/context.js') },
-      { find: 'protobox/parameters', replacement: resolve(protoboxRoot, 'dist/libs/parameters.js') },
+      { find: /^protobox\/(.+)$/, replacement: resolve(protoboxRoot, 'dist/libs/$1.js') },
       { find: /^protobox$/, replacement: resolve(protoboxRoot, 'dist/libs/index.js') },
       { find: '@', replacement: resolve(projectRoot, 'src') },
     ],

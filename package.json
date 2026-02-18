@@ -9,9 +9,7 @@
   "main": "./dist/libs/index.js",
   "exports": {
     ".": "./dist/libs/index.js",
-    "./context": "./dist/libs/context.js",
-    "./parameters": "./dist/libs/parameters.js",
-    "./useProtoParams": "./dist/libs/useProtoParams.js"
+    "./*": "./dist/libs/*.js"
   },
   "files": [
     "dist",

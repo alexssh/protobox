@@ -15,7 +15,7 @@ alwaysApply: false
 ## Build Isolation
 
 - Each target builds separately: `build:cli`, `build:libs`, `build:preview`.
-- Libs use separate entry points: `protobox`, `protobox/context`, `protobox/parameters`, `protobox/useProtoParams`.
+- Libs entry points are auto-discovered from `src/libs/*.{ts,tsx}`. Adding a new file there is enough — no config changes needed. Importable as `protobox/<name>`.
 
 ## Patterns
 
@@ -31,4 +31,4 @@ alwaysApply: false
 ## Extension Points
 
 - Add preset templates in `templates/presets/*.txt` with `{{NAME}}`, `{{NAMEPASCAL}}`.
-- Extend libs by adding new modules under `src/libs/` and exporting in `index.ts`.
+- Extend libs by adding a new `.ts`/`.tsx` file under `src/libs/` — it becomes an entry point automatically. Re-export from `index.ts` if it should be available via the `protobox` barrel import.
