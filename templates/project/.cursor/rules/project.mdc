@@ -14,7 +14,7 @@ src/
   components/ # Name/v1/Name.tsx + Name.scss; use v1, v2 for versions
   views/      # Name/v1/Name.tsx + Name.scss; one view per app
   data/       # Shared data
-  types/      # global/ (all apps), {{AppName}}/ (per-app, PascalCase)
+  @types/      # _global/ (all apps), {{AppName}}/ (per-app, PascalCase)
 ```
 
 ## Naming
@@ -59,8 +59,8 @@ const { Provider, useValue } = createProtoContext({ name, initialState, useImmer
 
 ## Types Isolation
 
-- `types/global/` — any app can import (Window augmentation)
-- `types/{{AppName}}/` — only that app should import; keeps app-specific types scoped
+- `@types/global/` — any app can import (Window augmentation)
+- `@types/{{AppName}}/` — only that app should import; keeps app-specific types scoped
 
 ## Do Not
 
