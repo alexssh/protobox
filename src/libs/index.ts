@@ -1,6 +1,6 @@
 /**
- * Proto libs - tree-shakable utilities for React prototypes.
- * Import from "proto", "proto/context", "proto/parameters", or "proto/useProtoParams".
+ * Protobox libs - tree-shakable utilities for React prototypes.
+ * Import from "protobox", "protobox/context", "protobox/parameters", or "protobox/useProtoParams".
  */
 
 export { createProtoContext, type CreateProtoContextOptions, type ProtoContextValue } from './context'

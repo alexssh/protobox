@@ -1,5 +1,5 @@
 import React from 'react'
-import { useProtoParams } from 'proto/useProtoParams'
+import { useProtoParams } from 'protobox/useProtoParams'
 
 import './App.scss'
 

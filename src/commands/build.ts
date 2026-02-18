@@ -8,7 +8,7 @@ export async function build(_args: string[]) {
   const appsDir = resolve(cwd, 'src/apps')
 
   if (!existsSync(appsDir)) {
-    console.error('No src/apps directory. Run proto init first.')
+    console.error('No src/apps directory. Run pbox init first.')
     process.exit(1)
   }
 
@@ -43,7 +43,7 @@ export async function build(_args: string[]) {
         return acc
       }, {} as Record<string, unknown>) ?? {}
 
-    const tempDir = join(buildDir, '.proto-temp', app)
+    const tempDir = join(buildDir, '.pbox-temp', app)
     mkdirSync(tempDir, { recursive: true })
     cpSync(appDir, tempDir, { recursive: true })
     writeFileSync(resolve(tempDir, 'index.html'), generateAppHtml(app, meta.title as string, defaultParams))
@@ -65,7 +65,7 @@ export async function build(_args: string[]) {
           cwd,
           stdio: 'inherit',
           shell: true,
-          env: { ...process.env, PROTO_APP_NAME: app, PROTO_APP_ROOT: tempDir },
+          env: { ...process.env, PBOX_APP_NAME: app, PBOX_APP_ROOT: tempDir },
         },
       )
 
@@ -148,7 +148,7 @@ function generateAppHtml(appName: string, title: string, defaultParams: Record<s
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${title}</title>
-    <script>window.__PROTO_PARAMS__=${paramsJson};</script>
+    <script>window.__PBOX_PARAMS__=${paramsJson};</script>
   </head>
   <body>
     <div id="root"></div>

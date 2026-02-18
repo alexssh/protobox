@@ -1,10 +1,10 @@
 ---
-description: Proto framework development - architecture, build isolation, CLI, libs, preview
+description: Protobox framework development - architecture, build isolation, CLI, libs, preview
 globs: src/**/*, vite*.config.ts, package.json
 alwaysApply: false
 ---
 
-# Proto Framework Development
+# Protobox Framework Development
 
 ## Architecture
 
@@ -15,7 +15,7 @@ alwaysApply: false
 ## Build Isolation
 
 - Each target builds separately: `build:cli`, `build:libs`, `build:preview`.
-- Libs use separate entry points: `proto`, `proto/context`, `proto/parameters`, `proto/useProtoParams`.
+- Libs use separate entry points: `protobox`, `protobox/context`, `protobox/parameters`, `protobox/useProtoParams`.
 
 ## Patterns
 

@@ -21,9 +21,9 @@ const commands: Record<string, (args: string[]) => void | Promise<void>> = {
 async function main() {
   if (!cmd || !commands[cmd]) {
     console.log(`
-Proto - React prototyping framework
+Protobox - React prototyping framework
 
-Usage: proto <command> [options]
+Usage: pbox <command> [options]
 
 Commands:
   init              Scaffold a new project

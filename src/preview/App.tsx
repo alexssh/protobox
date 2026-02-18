@@ -39,20 +39,20 @@ export default function App() {
     if (selected && params) {
       const iframe = document.getElementById('app-frame') as HTMLIFrameElement
       if (iframe?.contentWindow) {
-        iframe.contentWindow.postMessage({ type: 'proto-params', params }, '*')
+        iframe.contentWindow.postMessage({ type: 'pbox-params', params }, '*')
       }
     }
   }, [selected, params])
 
-  if (loading) return <div className="proto-loading">Loading apps...</div>
-  if (apps.length === 0) return <div className="proto-empty">No apps in build/. Run proto build.</div>
+  if (loading) return <div className="pbox-loading">Loading apps...</div>
+  if (apps.length === 0) return <div className="pbox-empty">No apps in build/. Run pbox build.</div>
 
   const currentApp = apps.find((a) => a.appName === selected)
 
   return (
-    <div className="proto-preview">
-      <header className="proto-header">
-        <h1>Proto Preview</h1>
+    <div className="pbox-preview">
+      <header className="pbox-header">
+        <h1>Protobox Preview</h1>
         <select
           value={selected}
           onChange={(e) => {
@@ -68,7 +68,7 @@ export default function App() {
           ))}
         </select>
       </header>
-      <aside className="proto-params">
+      <aside className="pbox-params">
         {currentApp?.parameters?.map((p) => (
           <ParamControl
             key={p.key}
@@ -77,15 +77,15 @@ export default function App() {
             onChange={(v) => setParams((prev) => ({ ...prev, [p.key]: v }))}
           />
         ))}
-        {(!currentApp?.parameters || currentApp.parameters.length === 0) && <p className="proto-no-params">No parameters</p>}
+        {(!currentApp?.parameters || currentApp.parameters.length === 0) && <p className="pbox-no-params">No parameters</p>}
       </aside>
-      <main className="proto-main">
+      <main className="pbox-main">
         <iframe
           id="app-frame"
           key={selected}
           src={`/apps/${selected}/index.html`}
           title={currentApp?.title}
-          className="proto-iframe"
+          className="pbox-iframe"
         />
       </main>
     </div>
@@ -105,7 +105,7 @@ function ParamControl({ param, value, onChange }: { param: ParameterMeta; value:
 
   if (param.type === 'boolean') {
     return (
-      <label className="proto-param">
+      <label className="pbox-param">
         <span>{label}</span>
         <input type="checkbox" checked={value === true} onChange={(e) => onChange(e.target.checked)} />
       </label>
@@ -114,7 +114,7 @@ function ParamControl({ param, value, onChange }: { param: ParameterMeta; value:
 
   if (param.type === 'number') {
     return (
-      <label className="proto-param">
+      <label className="pbox-param">
         <span>{label}</span>
         <input
           type="number"
@@ -127,7 +127,7 @@ function ParamControl({ param, value, onChange }: { param: ParameterMeta; value:
 
   if (param.type === 'string') {
     return (
-      <label className="proto-param">
+      <label className="pbox-param">
         <span>{label}</span>
         <input type="text" value={(value as string) ?? param.default ?? ''} onChange={(e) => onChange(e.target.value)} />
       </label>
@@ -137,7 +137,7 @@ function ParamControl({ param, value, onChange }: { param: ParameterMeta; value:
   if (param.type === 'paramoption' || param.type === 'option') {
     const opts = param.options ?? []
     return (
-      <label className="proto-param">
+      <label className="pbox-param">
         <span>{label}</span>
         <select value={(value as string) ?? param.default ?? ''} onChange={(e) => onChange(e.target.value)}>
           {opts.map((o) => (
@@ -154,7 +154,7 @@ function ParamControl({ param, value, onChange }: { param: ParameterMeta; value:
     const opts = param.options ?? []
     const arr = (Array.isArray(value) ? value : []) as string[]
     return (
-      <label className="proto-param proto-param-multi">
+      <label className="pbox-param pbox-param-multi">
         <span>{label}</span>
         <div>
           {opts.map((o) => (

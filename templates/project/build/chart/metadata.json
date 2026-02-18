@@ -1,0 +1,25 @@
+{
+  "appName": "chart",
+  "title": "Chart",
+  "description": "Chart app with Dashboard and Report views",
+  "parameters": [
+    {
+      "type": "boolean",
+      "key": "showGrid",
+      "label": "Show grid",
+      "default": true
+    },
+    {
+      "type": "number",
+      "key": "refreshInterval",
+      "label": "Refresh (s)",
+      "default": 30
+    },
+    {
+      "type": "string",
+      "key": "title",
+      "label": "Chart title",
+      "default": "Chart"
+    }
+  ]
+}

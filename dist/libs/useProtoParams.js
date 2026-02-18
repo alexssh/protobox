@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 function useProtoParams() {
   const [params, setParams] = useState(() => {
     if (typeof window === "undefined") return {};
-    return window.__PROTO_PARAMS__ ?? {};
+    return window.__PBOX_PARAMS__ ?? {};
   });
   useEffect(() => {
     const handler = (e) => {
-      if (e.data?.type === "proto-params" && e.data.params) {
+      if (e.data?.type === "pbox-params" && e.data.params) {
         setParams(e.data.params);
       }
     };

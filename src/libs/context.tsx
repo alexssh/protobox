@@ -1,5 +1,5 @@
 /**
- * Declarative context creation for Proto apps.
+ * Declarative context creation for Protobox apps.
  * Generates Provider and hook with full typing, optional Immer integration.
  */
 

@@ -9,7 +9,7 @@ export async function add(args: string[]) {
   const name = args[1]
 
   if (!entity || !name) {
-    console.error('Usage: proto add <app|component|view> <name>')
+    console.error('Usage: pbox add <app|component|view> <name>')
     process.exit(1)
   }
 
@@ -112,7 +112,7 @@ function readTemplate(type: string): string {
 function getDefaultTemplate(type: string): string {
   if (type === 'app') {
     return `---FILE---
-import { paramBoolean, paramString } from "proto/parameters";
+import { paramBoolean, paramString } from "protobox/parameters";
 
 export default {
   title: "{{NAMEPASCAL}}",

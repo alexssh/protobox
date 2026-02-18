@@ -1,10 +1,10 @@
 {
-  "name": "proto",
+  "name": "protobox",
   "version": "1.0.0",
   "description": "Prototyping framework for rapid development with React",
   "type": "module",
   "bin": {
-    "proto": "./dist/cli.js"
+    "pbox": "./dist/cli.js"
   },
   "main": "./dist/libs/index.js",
   "exports": {

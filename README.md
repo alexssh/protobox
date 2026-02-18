@@ -1,6 +1,6 @@
-# Proto
+# protobox
 
-React 18 + TypeScript prototyping framework for rapid project development. 
+React 18 + TypeScript prototyping framework for rapid project development.
 
 ## Overview
 
@@ -12,13 +12,13 @@ React 18 + TypeScript prototyping framework for rapid project development.
 ## CLI
 
 ```bash
-proto init             # scaffold project
-proto build            # build all apps
-proto watch            # build + watch
-proto run              # start preview server (or npm run server)
-proto add app foo      # add app
-proto add component Bar
-proto add view Dashboard
+pbox init             # scaffold project
+pbox build            # build all apps
+pbox watch            # build + watch
+pbox run              # start preview server (or npm run server)
+pbox add app foo      # add app
+pbox add component Bar
+pbox add view Dashboard
 ```
 
 ## Preview
@@ -27,7 +27,7 @@ proto add view Dashboard
 - Switch between apps via dropdown
 - Parameter UI (boolean, number, string, option, option-multi) from app config
 - Renders each app in an iframe; passes parameters via `postMessage`
-- Apps use `useProtoParams()` from `proto/useProtoParams` for default + live params
+- Apps use `useProtoParams()` from `protobox/useProtoParams` for default + live params
 
 ## Project Architecture
 
@@ -45,7 +45,7 @@ Each app has `config.ts`, `App.tsx`, `main.tsx`. `index.html` is generated at bu
 ### Context
 
 ```tsx
-import { createProtoContext } from "proto/context";
+import { createProtoContext } from "protobox/context";
 
 const { Provider, useValue } = createProtoContext({
   name: "User",
@@ -64,7 +64,7 @@ const { state, setState, update } = useValue();
 ### Parameters
 
 ```tsx
-import { paramBoolean, paramString, paramOption } from "proto/parameters";
+import { paramBoolean, paramString, paramOption } from "protobox/parameters";
 
 // In config.ts
 parameters: [
@@ -79,7 +79,7 @@ parameters: [
 
 ### Imports
 
-Use hard-coded paths for versions: `import { X } from "@/components/Card/v1/Card"` or `@/components/Card/v2/Card`. One view per app. All components and views define an interface.
+Use hard-coded paths: `import { X } from "@/components/Card/v1/Card"` or `@/components/Card/v2/Card`. One view per app. All components and views define an interface.
 
 ### Types
 
@@ -88,9 +88,9 @@ Use hard-coded paths for versions: `import { X } from "@/components/Card/v1/Card
 
 ### Workflow
 
-1. `proto init` → scaffold
-2. `proto add app myapp` → new app (creates `types/myapp/`)
-3. `proto add view Chart` → new view
+1. `pbox init` → scaffold
+2. `pbox add app myapp` → new app (creates `types/myapp/`)
+3. `pbox add view Chart` → new view
 4. Edit `config.ts`, `App.tsx`
 5. `npm run watch` + `npm run server` → iterate
 
@@ -112,7 +112,7 @@ templates/
 ### Build
 
 - CLI, libs, preview build separately
-- Import `proto/context` → only context code (tree-shaking)
+- Import `protobox/context` → only context code (tree-shaking)
 - Preview never imports project code; loads built apps only
 
 ### Extension
@@ -125,7 +125,7 @@ templates/
 
 ```bash
 npm run build          # build framework
-npm run dev:preview    # dev preview
+npm run dev:preview   # dev preview
 ```
 
-For project dev with local proto: `npm install /path/to/proto` or `npm link`.
+For project dev with local protobox: `npm install /path/to/protobox` or `npm link`.

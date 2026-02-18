@@ -13,13 +13,13 @@ function init(_args) {
     process.exit(1);
   }
   cpSync(templateDir, cwd, { recursive: true });
-  console.log("Project scaffolded. Run: npm install && proto build");
+  console.log("Project scaffolded. Run: npm install && pbox build");
 }
 async function build(_args) {
   const cwd = process.cwd();
   const appsDir = resolve(cwd, "src/apps");
   if (!existsSync(appsDir)) {
-    console.error("No src/apps directory. Run proto init first.");
+    console.error("No src/apps directory. Run pbox init first.");
     process.exit(1);
   }
   const apps = readdirSync(appsDir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
@@ -43,7 +43,7 @@ async function build(_args) {
       acc[p.key] = p.default;
       return acc;
     }, {}) ?? {};
-    const tempDir = join(buildDir, ".proto-temp", app);
+    const tempDir = join(buildDir, ".pbox-temp", app);
     mkdirSync(tempDir, { recursive: true });
     cpSync(appDir, tempDir, { recursive: true });
     writeFileSync(resolve(tempDir, "index.html"), generateAppHtml(app, meta.title, defaultParams));
@@ -64,7 +64,7 @@ async function build(_args) {
           cwd,
           stdio: "inherit",
           shell: true,
-          env: { ...process.env, PROTO_APP_NAME: app, PROTO_APP_ROOT: tempDir }
+          env: { ...process.env, PBOX_APP_NAME: app, PBOX_APP_ROOT: tempDir }
         }
       );
       if (result.status !== 0) process.exit(result.status ?? 1);
@@ -130,7 +130,7 @@ function generateAppHtml(appName, title, defaultParams) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${title}</title>
-    <script>window.__PROTO_PARAMS__=${paramsJson};<\/script>
+    <script>window.__PBOX_PARAMS__=${paramsJson};<\/script>
   </head>
   <body>
     <div id="root"></div>
@@ -164,10 +164,10 @@ const __dirname$2 = dirname(fileURLToPath(import.meta.url));
 const PORT = 5174;
 async function run(_args) {
   const cwd = process.cwd();
-  const protoRoot = resolve(__dirname$2, "..");
-  const previewDir = resolve(protoRoot, "dist/preview");
+  const pboxRoot = resolve(__dirname$2, "..");
+  const previewDir = resolve(pboxRoot, "dist/preview");
   if (!existsSync(resolve(previewDir, "index.html"))) {
-    console.error("Preview not built. Run: npm run build (from proto package)");
+    console.error("Preview not built. Run: npm run build (from protobox package)");
     process.exit(1);
   }
   const mimes = {
@@ -234,7 +234,7 @@ async function add(args2) {
   const entity = args2[0];
   const name = args2[1];
   if (!entity || !name) {
-    console.error("Usage: proto add <app|component|view> <name>");
+    console.error("Usage: pbox add <app|component|view> <name>");
     process.exit(1);
   }
   const cwd = process.cwd();
@@ -345,7 +345,7 @@ function readTemplate(type) {
 function getDefaultTemplate(type) {
   if (type === "app") {
     return `---FILE---
-import { paramBoolean, paramString } from "proto/parameters";
+import { paramBoolean, paramString } from "protobox/parameters";
 
 export default {
   title: "{{NAMEPASCAL}}",
@@ -397,9 +397,9 @@ const commands = {
 async function main() {
   if (!cmd || !commands[cmd]) {
     console.log(`
-Proto - React prototyping framework
+Protobox - React prototyping framework
 
-Usage: proto <command> [options]
+Usage: pbox <command> [options]
 
 Commands:
   init              Scaffold a new project

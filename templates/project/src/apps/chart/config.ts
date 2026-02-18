@@ -1,4 +1,4 @@
-import { paramBoolean, paramNumber, paramString } from "proto/parameters"
+import { paramBoolean, paramNumber, paramString } from "protobox/parameters"
 
 export default {
   title: "Chart",

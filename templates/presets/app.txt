@@ -1,5 +1,5 @@
 ---FILE---
-import { paramBoolean, paramString } from 'proto/parameters'
+import { paramBoolean, paramString } from 'protobox/parameters'
 
 export default {
   title: '{{NAMEPASCAL}}',
@@ -11,7 +11,7 @@ export default {
 }
 ---FILE---
 import React from 'react'
-import { useProtoParams } from 'proto/useProtoParams'
+import { useProtoParams } from 'protobox/useProtoParams'
 
 import './App.scss'
 

@@ -2,9 +2,9 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
 const projectRoot = process.cwd()
-const appName = process.env.PROTO_APP_NAME ?? 'demo'
-const appRoot = process.env.PROTO_APP_ROOT ?? resolve(projectRoot, 'src', 'apps', appName)
-const outDir = process.env.PROTO_OUT_DIR ?? resolve(projectRoot, 'build')
+const appName = process.env.PBOX_APP_NAME ?? 'demo'
+const appRoot = process.env.PBOX_APP_ROOT ?? resolve(projectRoot, 'src', 'apps', appName)
+const outDir = process.env.PBOX_OUT_DIR ?? resolve(projectRoot, 'build')
 
 export default defineConfig({
   base: './',

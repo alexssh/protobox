@@ -9,11 +9,11 @@ const PORT = 5174
 
 export async function run(_args: string[]) {
   const cwd = process.cwd()
-  const protoRoot = resolve(__dirname, '..')
-  const previewDir = resolve(protoRoot, 'dist/preview')
+  const pboxRoot = resolve(__dirname, '..')
+  const previewDir = resolve(pboxRoot, 'dist/preview')
 
   if (!existsSync(resolve(previewDir, 'index.html'))) {
-    console.error('Preview not built. Run: npm run build (from proto package)')
+    console.error('Preview not built. Run: npm run build (from protobox package)')
     process.exit(1)
   }
 

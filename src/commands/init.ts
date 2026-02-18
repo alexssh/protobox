@@ -14,5 +14,5 @@ export function init(_args: string[]) {
   }
 
   cpSync(templateDir, cwd, { recursive: true })
-  console.log('Project scaffolded. Run: npm install && proto build')
+  console.log('Project scaffolded. Run: npm install && pbox build')
 }

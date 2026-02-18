@@ -1,10 +1,10 @@
 ---
-description: Proto project development - apps, components, views, config
+description: Protobox project development - apps, components, views, config
 globs: "**/src/**/*"
 alwaysApply: false
 ---
 
-# Proto Project Development
+# Protobox Project Development
 
 ## Structure
 
@@ -20,12 +20,12 @@ src/
 ## Apps
 
 - Each app is isolated. `config.ts` has `title`, `description`, `parameters`.
-- Use params: `import { useProtoParams } from 'proto/useProtoParams'` then `const params = useProtoParams()`
+- Use params: `import { useProtoParams } from 'protobox/useProtoParams'` then `const params = useProtoParams()`
 - No inline styles; use SCSS files.
 
 ## Parameters
 
-Use `proto/parameters` in config:
+Use `protobox/parameters` in config:
 
 ```ts
 paramBoolean("key", "Label", true)

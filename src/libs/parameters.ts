@@ -1,5 +1,5 @@
 /**
- * Declarative parameter definition API for Proto apps.
+ * Declarative parameter definition API for Protobox apps.
  * Used by preview to render parameter UI and pass values to apps via postMessage.
  */
 

@@ -1,16 +1,16 @@
 {
-  "name": "proto-project",
+  "name": "protobox-project",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "proto build",
-    "watch": "proto watch",
-    "server": "proto run"
+    "build": "pbox build",
+    "watch": "pbox watch",
+    "server": "pbox run"
   },
   "dependencies": {
     "immer": "^10.0.3",
-    "proto": "*",
+    "protobox": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
