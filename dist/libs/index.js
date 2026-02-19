@@ -1,16 +1,8 @@
-import { createProtoContext } from "./context.js";
-import { getDefaultParameterValues, paramBoolean, paramNumber, paramOption, paramOptionMulti, paramString } from "./parameters.js";
-import { useProtoParams } from "./useProtoParams.js";
-import { bem } from "./bem.js";
-export {
-  bem,
-  createProtoContext,
-  getDefaultParameterValues,
-  paramBoolean,
-  paramNumber,
-  paramOption,
-  paramOptionMulti,
-  paramString,
-  useProtoParams
-};
-//# sourceMappingURL=index.js.map
+/**
+ * Protobox libs - tree-shakable utilities for React prototypes.
+ * Import from "protobox" or "protobox/<module>" (e.g. "protobox/context").
+ */
+export { createProtoContext } from './context';
+export { paramBoolean, paramNumber, paramString, paramOption, paramOptionMulti, getDefaultParameterValues, } from './parameters.js';
+export { useProtoParams } from './useProtoParams.js';
+export { bem } from './bem.js';

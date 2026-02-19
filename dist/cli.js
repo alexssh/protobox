@@ -416,7 +416,7 @@ function addApp(cwd, name) {
   const parts = files.split("---FILE---");
   const configTs = parts[1]?.trim() ?? "";
   const appTsx = parts[2]?.trim() ?? "";
-  const typesDir = resolve(cwd, "src/types", pascal);
+  const typesDir = resolve(cwd, "src/@types", pascal);
   mkdirSync(typesDir, { recursive: true });
   writeFileSync(
     resolve(typesDir, "index.ts"),
