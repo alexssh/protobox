@@ -107,6 +107,7 @@ export async function run(_args: string[]) {
         res.writeHead(200, {
           'Content-Type': mimes[ext] ?? 'application/octet-stream',
           'Cache-Control': 'no-cache',
+          'Access-Control-Allow-Origin': '*',
         })
         res.end(readFileSync(filePath))
         return
@@ -129,6 +130,7 @@ export async function run(_args: string[]) {
         res.writeHead(200, {
           'Content-Type': mimes[ext] ?? 'application/octet-stream',
           'Cache-Control': 'no-cache',
+          'Access-Control-Allow-Origin': '*',
         })
         res.end(body)
         return
@@ -138,7 +140,10 @@ export async function run(_args: string[]) {
     const filePath = resolve(previewDir, path.slice(1))
     if (existsSync(filePath)) {
       const ext = extname(filePath)
-      res.writeHead(200, { 'Content-Type': mimes[ext] ?? 'application/octet-stream' })
+      res.writeHead(200, {
+        'Content-Type': mimes[ext] ?? 'application/octet-stream',
+        'Access-Control-Allow-Origin': '*',
+      })
       res.end(readFileSync(filePath))
       return
     }
@@ -147,7 +152,7 @@ export async function run(_args: string[]) {
     res.end('Not found')
   })
 
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`Preview: http://localhost:${PORT}`)
     const url = `http://localhost:${PORT}`
     const cmd =

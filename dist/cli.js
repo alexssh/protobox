@@ -390,7 +390,8 @@ async function run(_args) {
         const ext = extname(filePath2);
         res.writeHead(200, {
           "Content-Type": mimes[ext] ?? "application/octet-stream",
-          "Cache-Control": "no-cache"
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*"
         });
         res.end(readFileSync(filePath2));
         return;
@@ -411,7 +412,8 @@ async function run(_args) {
         }
         res.writeHead(200, {
           "Content-Type": mimes[ext] ?? "application/octet-stream",
-          "Cache-Control": "no-cache"
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*"
         });
         res.end(body);
         return;
@@ -420,14 +422,17 @@ async function run(_args) {
     const filePath = resolve(previewDir, path.slice(1));
     if (existsSync(filePath)) {
       const ext = extname(filePath);
-      res.writeHead(200, { "Content-Type": mimes[ext] ?? "application/octet-stream" });
+      res.writeHead(200, {
+        "Content-Type": mimes[ext] ?? "application/octet-stream",
+        "Access-Control-Allow-Origin": "*"
+      });
       res.end(readFileSync(filePath));
       return;
     }
     res.writeHead(404);
     res.end("Not found");
   });
-  server.listen(PORT, () => {
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`Preview: http://localhost:${PORT}`);
     const url = `http://localhost:${PORT}`;
     const cmd2 = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
