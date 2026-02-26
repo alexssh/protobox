@@ -115,7 +115,7 @@ export default function App() {
           ref={iframeRef}
           id="app-frame"
           key={`${selected}-${reloadKey}`}
-          src={`/apps/${selected}/index.html`}
+          src={`/apps/${selected}/index.html?v=${reloadKey}`}
           title={currentApp?.title}
           className="pbox-iframe"
           onLoad={sendParams}

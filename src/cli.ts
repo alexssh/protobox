@@ -4,6 +4,7 @@ import { init } from './commands/init.js'
 import { build } from './commands/build.js'
 import { watch } from './commands/watch.js'
 import { run } from './commands/run.js'
+import { dev } from './commands/dev.js'
 import { add } from './commands/add.js'
 
 const args = process.argv.slice(2)
@@ -15,6 +16,7 @@ const commands: Record<string, (args: string[]) => void | Promise<void>> = {
   build,
   watch,
   run,
+  dev,
   add,
 }
 
@@ -30,6 +32,7 @@ Commands:
   build [App...]    Build apps (all if no args)
   watch [App...]    Watch & rebuild (all if no args)
   run               Start preview server
+  dev [App...]      Run server + watch (all apps if no args)
   add app           Add a new app
   add component     Add a new component
   add view          Add a new view

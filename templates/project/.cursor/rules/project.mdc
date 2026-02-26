@@ -13,6 +13,7 @@ src/
   apps/       # PascalCase dirs: App.tsx → Name.tsx, Name.scss, main.tsx, config.ts, context.tsx
   components/ # Name/v1/Name.tsx + Name.scss; use v1, v2 for versions
   views/      # Name/v1/Name.tsx + Name.scss + NameData.ts; one view per app
+  assets/     # Images, fonts (jpg, otf, etc.) — copied to build/assets/, served at /assets/
   static/     # Shared static/mock data (import via @/static)
   @types/     # _global/ (all apps), {{AppName}}/ (per-app, PascalCase)
 ```
@@ -53,6 +54,13 @@ Each view has a `{ViewName}Data.ts` file alongside it (e.g., `DemoView/v1/DemoVi
 - The hook accepts a context hook and returns wired-up data with callbacks.
 - Views are pure presentation: accept `data` prop with a default, no hooks or context calls inside.
 - Apps wire data by calling the hook and passing the result to the view.
+
+## Assets
+
+Place images, fonts, etc. in `src/assets/`. Use absolute path `/assets/...` (no import — avoids duplication across apps):
+
+- **TSX:** `<img src="/assets/images/logo.jpg" />`
+- **SCSS:** `url('/assets/fonts/MyFont.otf')`, `url('/assets/images/bg.jpg')`
 
 ## Imports
 

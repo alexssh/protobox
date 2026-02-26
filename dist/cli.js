@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, cpSync, readdirSync, mkdirSync, writeFileSync, rmSync, readFileSync, watch as watch$1 } from "fs";
+import { existsSync, cpSync, readdirSync, mkdirSync, rmSync, writeFileSync, readFileSync, watch as watch$1 } from "fs";
 import { resolve, dirname, join, extname } from "path";
 import { fileURLToPath } from "url";
 import { spawnSync, spawn } from "child_process";
@@ -53,7 +53,16 @@ function buildApp(cwd, appName) {
     return;
   }
   if (!existsSync(buildDir)) mkdirSync(buildDir, { recursive: true });
+  const assetsSrc = resolve(cwd, "src", "assets");
+  if (existsSync(assetsSrc)) {
+    const assetsDest = join(buildDir, "assets");
+    mkdirSync(assetsDest, { recursive: true });
+    cpSync(assetsSrc, assetsDest, { recursive: true });
+  }
   const outDir = join(buildDir, appName);
+  if (existsSync(outDir)) {
+    rmSync(outDir, { recursive: true, force: true });
+  }
   mkdirSync(outDir, { recursive: true });
   const meta = extractMetadata(appDir, appName);
   const defaultParams = meta.parameters?.reduce((acc, p) => {
@@ -206,7 +215,13 @@ async function watch(args2) {
     if (!filename || filename.includes("node_modules")) return;
     const normalized = filename.replace(/\\/g, "/");
     const appMatch = normalized.match(/^apps\/([^/]+)/);
-    if (appMatch) {
+    const assetsMatch = normalized.startsWith("assets/");
+    if (assetsMatch) {
+      lastTrigger = normalized;
+      const allApps = existsSync(appsDir) ? readdirSync(appsDir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name) : [];
+      const scope = filterApps.length > 0 ? allApps.filter((a) => filterApps.includes(a)) : allApps;
+      scope.forEach((a) => pendingApps.add(a));
+    } else if (appMatch) {
       const appName = appMatch[1];
       if (filterApps.length > 0 && !filterApps.includes(appName)) return;
       lastTrigger = `apps/${appName}/${normalized.split("/").pop()}`;
@@ -299,7 +314,18 @@ async function run(_args) {
     ".js": "application/javascript",
     ".css": "text/css",
     ".json": "application/json",
-    ".ico": "image/x-icon"
+    ".ico": "image/x-icon",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".svg": "image/svg+xml",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2",
+    ".ttf": "font/ttf",
+    ".otf": "font/otf",
+    ".eot": "application/vnd.ms-fontobject"
   };
   const sseClients = /* @__PURE__ */ new Set();
   let reloadTimer = null;
@@ -309,7 +335,7 @@ async function run(_args) {
       for (const client of sseClients) {
         client.write("data: reload\n\n");
       }
-    }, 300);
+    }, 800);
   }
   if (existsSync(buildDir)) {
     watch$1(buildDir, { recursive: true }, () => notifyReload());
@@ -354,12 +380,28 @@ async function run(_args) {
       res.end(JSON.stringify(apps));
       return;
     }
+    if (path.startsWith("/assets/")) {
+      const rel = path.slice(8);
+      const filePath2 = resolve(buildDir, "assets", rel);
+      if (existsSync(filePath2)) {
+        const ext = extname(filePath2);
+        res.writeHead(200, {
+          "Content-Type": mimes[ext] ?? "application/octet-stream",
+          "Cache-Control": "no-cache"
+        });
+        res.end(readFileSync(filePath2));
+        return;
+      }
+    }
     if (path.startsWith("/apps/")) {
       const rel = path.slice(6);
       const filePath2 = resolve(buildDir, rel);
       if (existsSync(filePath2)) {
         const ext = extname(filePath2);
-        res.writeHead(200, { "Content-Type": mimes[ext] ?? "application/octet-stream" });
+        res.writeHead(200, {
+          "Content-Type": mimes[ext] ?? "application/octet-stream",
+          "Cache-Control": "no-cache"
+        });
         res.end(readFileSync(filePath2));
         return;
       }
@@ -380,6 +422,21 @@ async function run(_args) {
     const cmd2 = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
     spawn(cmd2, [url], { stdio: "ignore" }).unref();
   });
+}
+async function dev(args2) {
+  const runProc = spawn(process.execPath, [process.argv[1], "run"], {
+    stdio: "inherit",
+    env: process.env
+  });
+  runProc.on("error", (err) => {
+    console.error("Server failed:", err);
+    process.exit(1);
+  });
+  process.on("SIGINT", () => {
+    runProc.kill();
+    process.exit(0);
+  });
+  await watch(args2);
 }
 const __dirname$1 = dirname(fileURLToPath(import.meta.url));
 async function add(args2) {
@@ -582,6 +639,7 @@ const commands = {
   build,
   watch,
   run,
+  dev,
   add
 };
 async function main() {
@@ -596,6 +654,7 @@ Commands:
   build [App...]    Build apps (all if no args)
   watch [App...]    Watch & rebuild (all if no args)
   run               Start preview server
+  dev [App...]      Run server + watch (all apps if no args)
   add app           Add a new app
   add component     Add a new component
   add view          Add a new view

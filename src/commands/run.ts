@@ -24,6 +24,17 @@ export async function run(_args: string[]) {
     '.css': 'text/css',
     '.json': 'application/json',
     '.ico': 'image/x-icon',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp',
+    '.svg': 'image/svg+xml',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.otf': 'font/otf',
+    '.eot': 'application/vnd.ms-fontobject',
   }
 
   const sseClients = new Set<ServerResponse>()
@@ -35,7 +46,7 @@ export async function run(_args: string[]) {
       for (const client of sseClients) {
         client.write('data: reload\n\n')
       }
-    }, 300)
+    }, 800)
   }
 
   if (existsSync(buildDir)) {
@@ -88,12 +99,29 @@ export async function run(_args: string[]) {
       return
     }
 
+    if (path.startsWith('/assets/')) {
+      const rel = path.slice(8)
+      const filePath = resolve(buildDir, 'assets', rel)
+      if (existsSync(filePath)) {
+        const ext = extname(filePath)
+        res.writeHead(200, {
+          'Content-Type': mimes[ext] ?? 'application/octet-stream',
+          'Cache-Control': 'no-cache',
+        })
+        res.end(readFileSync(filePath))
+        return
+      }
+    }
+
     if (path.startsWith('/apps/')) {
       const rel = path.slice(6)
       const filePath = resolve(buildDir, rel)
       if (existsSync(filePath)) {
         const ext = extname(filePath)
-        res.writeHead(200, { 'Content-Type': mimes[ext] ?? 'application/octet-stream' })
+        res.writeHead(200, {
+          'Content-Type': mimes[ext] ?? 'application/octet-stream',
+          'Cache-Control': 'no-cache',
+        })
         res.end(readFileSync(filePath))
         return
       }

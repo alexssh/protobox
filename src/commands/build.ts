@@ -55,7 +55,17 @@ export function buildApp(cwd: string, appName: string) {
 
   if (!existsSync(buildDir)) mkdirSync(buildDir, { recursive: true })
 
+  const assetsSrc = resolve(cwd, 'src', 'assets')
+  if (existsSync(assetsSrc)) {
+    const assetsDest = join(buildDir, 'assets')
+    mkdirSync(assetsDest, { recursive: true })
+    cpSync(assetsSrc, assetsDest, { recursive: true })
+  }
+
   const outDir = join(buildDir, appName)
+  if (existsSync(outDir)) {
+    rmSync(outDir, { recursive: true, force: true })
+  }
   mkdirSync(outDir, { recursive: true })
 
   const meta = extractMetadata(appDir, appName)

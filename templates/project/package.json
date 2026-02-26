@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+		"dev": "pbox dev",
     "build": "pbox build",
     "watch": "pbox watch",
     "server": "pbox run",

@@ -60,8 +60,18 @@ export async function watch(args: string[]) {
 
     const normalized = filename.replace(/\\/g, '/')
     const appMatch = normalized.match(/^apps\/([^/]+)/)
+    const assetsMatch = normalized.startsWith('assets/')
 
-    if (appMatch) {
+    if (assetsMatch) {
+      lastTrigger = normalized
+      const allApps = existsSync(appsDir)
+        ? readdirSync(appsDir, { withFileTypes: true })
+            .filter((d) => d.isDirectory())
+            .map((d) => d.name)
+        : []
+      const scope = filterApps.length > 0 ? allApps.filter((a) => filterApps.includes(a)) : allApps
+      scope.forEach((a) => pendingApps.add(a))
+    } else if (appMatch) {
       const appName = appMatch[1]
       if (filterApps.length > 0 && !filterApps.includes(appName)) return
       lastTrigger = `apps/${appName}/${normalized.split('/').pop()}`
