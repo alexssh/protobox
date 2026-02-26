@@ -9,7 +9,7 @@ import { useChartViewData } from '@/views/ChartView/v1/ChartViewData'
 
 import { AppProvider, useAppContext } from './context'
 
-const b = bem.bind(null, 'Chart-app')
+const b = bem.bind(null, 'ChartApp')
 
 export default function Chart() {
   const params = useProtoParams()

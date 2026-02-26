@@ -16,7 +16,7 @@ import { bem } from 'protobox/bem'
 
 import './{{NAMEPASCAL}}.scss'
 
-const b = bem.bind(null, '{{NAME}}-app')
+const b = bem.bind(null, '{{NAME}}App')
 
 export default function {{NAMEPASCAL}}() {
   const params = useProtoParams()
@@ -27,3 +27,32 @@ export default function {{NAMEPASCAL}}() {
     </div>
   )
 }
+---FILE---
+.{{NAME}}App {
+  padding: 1rem;
+  font-family: system-ui;
+}
+
+.{{NAME}}App__title {
+  margin: 0 0 1rem;
+}
+
+.{{NAME}}App__params {
+  font-size: 0.875rem;
+  background: #f5f5f5;
+  padding: 1rem;
+  border-radius: 4px;
+}
+---FILE---
+import React from "react"
+import ReactDOM from "react-dom/client"
+import {{NAMEPASCAL}} from "./{{NAMEPASCAL}}"
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <{{NAMEPASCAL}} />
+  </React.StrictMode>,
+)
+---FILE---
+/** Types specific to the {{NAMEPASCAL}} app. Import from "@/types/{{NAMEPASCAL}}". */
+export {};

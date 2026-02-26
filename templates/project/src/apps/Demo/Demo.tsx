@@ -9,7 +9,7 @@ import { useDemoViewData } from '@/views/DemoView/v1/DemoViewData'
 
 import { AppProvider, useAppContext } from './context'
 
-const b = bem.bind(null, 'Demo-app')
+const b = bem.bind(null, 'DemoApp')
 
 export default function Demo() {
   const params = useProtoParams()

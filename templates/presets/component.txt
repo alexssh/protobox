@@ -1,3 +1,4 @@
+---FILE---
 import React from 'react'
 import { bem } from 'protobox/bem'
 
@@ -12,3 +13,9 @@ interface {{NAMEPASCAL}}Props {
 export function {{NAMEPASCAL}}({ children }: {{NAMEPASCAL}}Props) {
   return <div className={b()}>{children}</div>
 }
+---FILE---
+.{{NAME}} {
+  margin: 0;
+}
+---FILE---
+export { {{NAMEPASCAL}} } from './v1/{{NAMEPASCAL}}'
