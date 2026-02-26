@@ -13,7 +13,11 @@ export default defineConfig({
     target: "es2022",
   },
   resolve: {
-    alias: { "@": resolve(__dirname, "src/preview") },
+    alias: [
+      { find: /^protobox\/(.+)$/, replacement: resolve(__dirname, "src/libs/$1.ts") },
+      { find: /^protobox$/, replacement: resolve(__dirname, "src/libs/index.ts") },
+      { find: "@", replacement: resolve(__dirname, "src/preview") },
+    ],
   },
   server: {
     port: 5174,

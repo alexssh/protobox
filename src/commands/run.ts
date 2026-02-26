@@ -118,11 +118,19 @@ export async function run(_args: string[]) {
       const filePath = resolve(buildDir, rel)
       if (existsSync(filePath)) {
         const ext = extname(filePath)
+        let body: Buffer | string = readFileSync(filePath)
+        if (ext === '.html') {
+          const html = body.toString('utf-8')
+          if (html.includes('</body>')) {
+            const script = `<script>(function(){document.addEventListener('keydown',function(e){if((e.metaKey||e.ctrlKey)&&e.key==='.'){e.preventDefault();window.parent.postMessage({type:'pbox-toggle-ui'},'*');}});})();</script>`
+            body = html.replace('</body>', script + '</body>')
+          }
+        }
         res.writeHead(200, {
           'Content-Type': mimes[ext] ?? 'application/octet-stream',
           'Cache-Control': 'no-cache',
         })
-        res.end(readFileSync(filePath))
+        res.end(body)
         return
       }
     }

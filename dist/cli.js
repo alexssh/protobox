@@ -401,11 +401,19 @@ async function run(_args) {
       const filePath2 = resolve(buildDir, rel);
       if (existsSync(filePath2)) {
         const ext = extname(filePath2);
+        let body = readFileSync(filePath2);
+        if (ext === ".html") {
+          const html = body.toString("utf-8");
+          if (html.includes("</body>")) {
+            const script = `<script>(function(){document.addEventListener('keydown',function(e){if((e.metaKey||e.ctrlKey)&&e.key==='.'){e.preventDefault();window.parent.postMessage({type:'pbox-toggle-ui'},'*');}});})();<\/script>`;
+            body = html.replace("</body>", script + "</body>");
+          }
+        }
         res.writeHead(200, {
           "Content-Type": mimes[ext] ?? "application/octet-stream",
           "Cache-Control": "no-cache"
         });
-        res.end(readFileSync(filePath2));
+        res.end(body);
         return;
       }
     }

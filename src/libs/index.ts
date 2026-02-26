@@ -25,3 +25,11 @@ export {
 export { useProtoParams } from './useProtoParams.js'
 
 export { bem } from './bem.js'
+
+export {
+  getDeviceInfo,
+  isMobileDevice,
+  type DeviceInfo,
+  type DeviceOs,
+  type ScreenSize,
+} from './device.js'

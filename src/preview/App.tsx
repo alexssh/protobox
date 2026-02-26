@@ -23,7 +23,18 @@ export default function App() {
   const [params, setParams] = useState<Record<string, unknown>>({})
   const [loading, setLoading] = useState(true)
   const [reloadKey, setReloadKey] = useState(0)
+  const [uiHidden, setUiHidden] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const uiHiddenRef = useRef(uiHidden)
+  uiHiddenRef.current = uiHidden
+
+  const doShow = useCallback(() => setUiHidden(false), [])
+  const doHide = useCallback(() => setUiHidden(true), [])
+
+  const toggleUi = useCallback(() => {
+    if (uiHiddenRef.current) doShow()
+    else doHide()
+  }, [doShow, doHide])
 
   const sendParams = useCallback(() => {
     const w = iframeRef.current?.contentWindow
@@ -75,16 +86,37 @@ export default function App() {
     return () => es.close()
   }, [fetchApps])
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.metaKey && e.key === '.') {
+        e.preventDefault()
+        toggleUi()
+      }
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [toggleUi])
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'pbox-toggle-ui') toggleUi()
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [toggleUi])
+
+
   if (loading) return <div className="pbox-loading">Loading apps...</div>
   if (apps.length === 0) return <div className="pbox-empty">No apps in build/. Run pbox build.</div>
 
   const currentApp = apps.find((a) => a.appName === selected)
 
   return (
-    <div className="pbox-preview">
-      <header className="pbox-header">
-        <h1>Protobox Preview</h1>
-        <select
+    <div className={`pbox-preview${uiHidden ? ' pbox-preview_ui-hidden' : ''}`}>
+      {!uiHidden && (
+        <header className="pbox-header">
+          <h1>Protobox Preview</h1>
+          <select
           value={selected}
           onChange={(e) => {
             const app = apps.find((a) => a.appName === e.target.value)
@@ -98,7 +130,12 @@ export default function App() {
             </option>
           ))}
         </select>
-      </header>
+          <button type="button" className="pbox-hide-btn" onClick={doHide} title="Hide UI (Cmd+.)" aria-label="Hide UI">
+            Hide UI
+          </button>
+        </header>
+      )}
+      {!uiHidden && (
       <aside className="pbox-params">
         {currentApp?.parameters?.map((p) => (
           <ParamControl
@@ -110,6 +147,12 @@ export default function App() {
         ))}
         {(!currentApp?.parameters || currentApp.parameters.length === 0) && <p className="pbox-no-params">No parameters</p>}
       </aside>
+      )}
+      {uiHidden && (
+        <button type="button" className="pbox-float-btn" onClick={doShow} title="Show UI (Cmd+.)" aria-label="Show UI">
+          Show UI
+        </button>
+      )}
       <main className="pbox-main">
         <iframe
           ref={iframeRef}
