@@ -64,7 +64,7 @@ function addApp(cwd: string, name: string) {
 
 function addComponent(cwd: string, name: string) {
   const pascal = toPascal(name)
-  const kebab = toKebab(name)
+  const kebab = toKebab(pascal)
   const baseDir = resolve(cwd, 'src/components', pascal)
   const v1Dir = resolve(baseDir, 'v1')
   mkdirSync(v1Dir, { recursive: true })
@@ -122,7 +122,7 @@ function toPascal(s: string): string {
 
 function toKebab(s: string): string {
   return s
-    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
     .replace(/\s+/g, '-')
     .toLowerCase()
 }

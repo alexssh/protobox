@@ -499,7 +499,7 @@ function addApp(cwd, name) {
 }
 function addComponent(cwd, name) {
   const pascal = toPascal(name);
-  const kebab = toKebab(name);
+  const kebab = toKebab(pascal);
   const baseDir = resolve(cwd, "src/components", pascal);
   const v1Dir = resolve(baseDir, "v1");
   mkdirSync(v1Dir, { recursive: true });
@@ -546,7 +546,7 @@ function toPascal(s) {
   return s.replace(/-([a-z])/g, (_, c) => c.toUpperCase()).replace(/^./, (c) => c.toUpperCase());
 }
 function toKebab(s) {
-  return s.replace(/([a-z])([A-Z])/g, "$1-$2").replace(/\s+/g, "-").toLowerCase();
+  return s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/\s+/g, "-").toLowerCase();
 }
 const args = process.argv.slice(2);
 const cmd = args[0];
