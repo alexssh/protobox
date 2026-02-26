@@ -54,8 +54,11 @@ function buildApp(cwd, appName) {
   }
   if (!existsSync(buildDir)) mkdirSync(buildDir, { recursive: true });
   const assetsSrc = resolve(cwd, "src", "assets");
+  const assetsDest = join(buildDir, "assets");
+  if (existsSync(assetsDest)) {
+    rmSync(assetsDest, { recursive: true, force: true });
+  }
   if (existsSync(assetsSrc)) {
-    const assetsDest = join(buildDir, "assets");
     mkdirSync(assetsDest, { recursive: true });
     cpSync(assetsSrc, assetsDest, { recursive: true });
   }
@@ -335,7 +338,7 @@ async function run(_args) {
       for (const client of sseClients) {
         client.write("data: reload\n\n");
       }
-    }, 800);
+    }, 300);
   }
   if (existsSync(buildDir)) {
     watch$1(buildDir, { recursive: true }, () => notifyReload());
@@ -355,7 +358,7 @@ async function run(_args) {
       res.writeHead(200, {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
-        "Connection": "keep-alive"
+        Connection: "keep-alive"
       });
       res.write("data: connected\n\n");
       sseClients.add(res);
@@ -368,7 +371,7 @@ async function run(_args) {
         res.end(JSON.stringify([]));
         return;
       }
-      const apps = readdirSync(buildDir, { withFileTypes: true }).filter((d) => d.isDirectory() && !d.name.startsWith(".")).map((d) => {
+      const apps = readdirSync(buildDir, { withFileTypes: true }).filter((d) => d.isDirectory() && !d.name.startsWith(".") && d.name !== "assets").map((d) => {
         const metaPath = join(buildDir, d.name, "metadata.json");
         let meta = { appName: d.name, title: d.name, parameters: [] };
         if (existsSync(metaPath)) {

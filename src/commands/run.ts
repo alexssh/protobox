@@ -85,7 +85,7 @@ export async function run(_args: string[]) {
         return
       }
       const apps = readdirSync(buildDir, { withFileTypes: true })
-        .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
+        .filter((d) => d.isDirectory() && !d.name.startsWith('.') && d.name !== 'assets')
         .map((d) => {
           const metaPath = join(buildDir, d.name, 'metadata.json')
           let meta = { appName: d.name, title: d.name, parameters: [] }

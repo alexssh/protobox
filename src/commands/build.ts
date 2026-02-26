@@ -56,8 +56,11 @@ export function buildApp(cwd: string, appName: string) {
   if (!existsSync(buildDir)) mkdirSync(buildDir, { recursive: true })
 
   const assetsSrc = resolve(cwd, 'src', 'assets')
+  const assetsDest = join(buildDir, 'assets')
+  if (existsSync(assetsDest)) {
+    rmSync(assetsDest, { recursive: true, force: true })
+  }
   if (existsSync(assetsSrc)) {
-    const assetsDest = join(buildDir, 'assets')
     mkdirSync(assetsDest, { recursive: true })
     cpSync(assetsSrc, assetsDest, { recursive: true })
   }
