@@ -46,7 +46,7 @@ export async function run(_args: string[]) {
       for (const client of sseClients) {
         client.write('data: reload\n\n')
       }
-    }, 800)
+    }, 300)
   }
 
   if (existsSync(buildDir)) {
@@ -70,7 +70,7 @@ export async function run(_args: string[]) {
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
       })
       res.write('data: connected\n\n')
       sseClients.add(res)
@@ -142,7 +142,8 @@ export async function run(_args: string[]) {
   server.listen(PORT, () => {
     console.log(`Preview: http://localhost:${PORT}`)
     const url = `http://localhost:${PORT}`
-    const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open'
+    const cmd =
+      process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open'
     spawn(cmd, [url], { stdio: 'ignore' }).unref()
   })
 }
