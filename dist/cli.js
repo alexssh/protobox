@@ -471,8 +471,9 @@ async function add(args2) {
   fn(name);
 }
 function addApp(cwd, name) {
-  const pascal = toPascal(name);
-  const kebab = toKebab(name);
+  const basePascal = toPascal(name);
+  const pascal = basePascal.endsWith("App") ? basePascal : `${basePascal}App`;
+  const kebab = toKebab(pascal);
   const appDir = resolve(cwd, "src/apps", pascal);
   if (existsSync(appDir)) {
     console.error(`App ${pascal} already exists`);
@@ -514,8 +515,9 @@ function addComponent(cwd, name) {
   console.log(`Created component: src/components/${pascal}`);
 }
 function addView(cwd, name) {
-  const pascal = toPascal(name);
-  const kebab = toKebab(name);
+  const basePascal = toPascal(name);
+  const pascal = basePascal.endsWith("View") ? basePascal : `${basePascal}View`;
+  const kebab = toKebab(pascal);
   const baseDir = resolve(cwd, "src/views", pascal);
   const v1Dir = resolve(baseDir, "v1");
   mkdirSync(v1Dir, { recursive: true });

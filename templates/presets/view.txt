@@ -12,7 +12,7 @@ import './{{NAMEPASCAL}}.scss'
 
 import { defaultData, type {{NAMEPASCAL}}Data } from './{{NAMEPASCAL}}Data'
 
-const b = bem.bind(null, '{{NAME}}View')
+const b = bem.bind(null, '{{NAME}}')
 
 interface {{NAMEPASCAL}}Props {
   data?: {{NAMEPASCAL}}Data
@@ -22,8 +22,8 @@ export function {{NAMEPASCAL}}({ data = defaultData }: {{NAMEPASCAL}}Props) {
   return <div className={b()}>{data.children}</div>
 }
 ---FILE---
-.{{NAME}}View {
-  margin-top: 1rem;
+.{{NAME}} {
+  position: relative;å
 }
 ---FILE---
 export { {{NAMEPASCAL}} } from './v1/{{NAMEPASCAL}}'

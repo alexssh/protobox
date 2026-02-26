@@ -10,7 +10,7 @@ alwaysApply: false
 
 ```
 src/
-  apps/       # PascalCase dirs: App.tsx → Name.tsx, Name.scss, main.tsx, config.ts, context.tsx
+  apps/       # PascalCase dirs: NameApp.tsx, NameApp.scss, main.tsx, config.ts, context.tsx (App suffix auto-added)
   components/ # Name/v1/Name.tsx + Name.scss; use v1, v2 for versions
   views/      # Name/v1/Name.tsx + Name.scss + NameData.ts; one view per app
   assets/     # Images, fonts (jpg, otf, etc.) — copied to build/assets/, served at /assets/
@@ -21,7 +21,7 @@ src/
 ## Naming
 
 - All entity directories (apps, components, views, types) use **PascalCase**: `Chart`, `DemoView`, `Card`.
-- App files are named after the app: `Chart.tsx`, `Chart.scss` (not `App.tsx`).
+- App files are named after the app with App suffix: `ChartApp.tsx`, `ChartApp.scss` (not `App.tsx`).
 - Component/view files are named after the entity: `Card.tsx`, `ChartView.tsx`.
 - CSS classes use **BEM kebab-case**: `.chart-app`, `.card_version-v1`, `.demo-view`. Use `bem()` from `protobox/bem` for root `className`; naming: `Block__element_modifier-value`.
 - `main.tsx` and `config.ts` keep their generic names (entry point and config).

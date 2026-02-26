@@ -15,7 +15,7 @@ export function {{NAMEPASCAL}}({ children }: {{NAMEPASCAL}}Props) {
 }
 ---FILE---
 .{{NAME}} {
-  margin: 0;
+  position: relative;
 }
 ---FILE---
 export { {{NAMEPASCAL}} } from './v1/{{NAMEPASCAL}}'

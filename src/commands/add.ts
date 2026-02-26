@@ -31,8 +31,9 @@ export async function add(args: string[]) {
 }
 
 function addApp(cwd: string, name: string) {
-  const pascal = toPascal(name)
-  const kebab = toKebab(name)
+  const basePascal = toPascal(name)
+  const pascal = basePascal.endsWith('App') ? basePascal : `${basePascal}App`
+  const kebab = toKebab(pascal)
   const appDir = resolve(cwd, 'src/apps', pascal)
   if (existsSync(appDir)) {
     console.error(`App ${pascal} already exists`)
@@ -83,8 +84,9 @@ function addComponent(cwd: string, name: string) {
 }
 
 function addView(cwd: string, name: string) {
-  const pascal = toPascal(name)
-  const kebab = toKebab(name)
+  const basePascal = toPascal(name)
+  const pascal = basePascal.endsWith('View') ? basePascal : `${basePascal}View`
+  const kebab = toKebab(pascal)
   const baseDir = resolve(cwd, 'src/views', pascal)
   const v1Dir = resolve(baseDir, 'v1')
   mkdirSync(v1Dir, { recursive: true })

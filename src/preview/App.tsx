@@ -1,6 +1,30 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 
-const STORAGE_KEY = 'pbox-selected-app'
+const STORAGE_KEY_APP = 'pbox-selected-app'
+const STORAGE_KEY_PARAMS = 'pbox-params'
+
+function loadParamsForApp(appName: string, app: AppMeta): Record<string, unknown> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PARAMS)
+    if (!raw) return extractDefaults(app)
+    const all = JSON.parse(raw) as Record<string, Record<string, unknown>>
+    const saved = all[appName]
+    if (!saved) return extractDefaults(app)
+    const defaults = extractDefaults(app)
+    return { ...defaults, ...saved }
+  } catch {
+    return extractDefaults(app)
+  }
+}
+
+function saveParamsForApp(appName: string, params: Record<string, unknown>) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PARAMS)
+    const all = raw ? (JSON.parse(raw) as Record<string, Record<string, unknown>>) : {}
+    all[appName] = params
+    localStorage.setItem(STORAGE_KEY_PARAMS, JSON.stringify(all))
+  } catch {}
+}
 
 interface AppMeta {
   appName: string
@@ -53,14 +77,14 @@ export default function App() {
   useEffect(() => {
     fetchApps()
       .then((data) => {
-        const saved = localStorage.getItem(STORAGE_KEY)
-        const validApp = data.find((a) => a.appName === saved)
+        const savedApp = localStorage.getItem(STORAGE_KEY_APP)
+        const validApp = data.find((a) => a.appName === savedApp)
         if (validApp) {
-          setSelected(saved!)
-          setParams(extractDefaults(validApp))
+          setSelected(savedApp!)
+          setParams(loadParamsForApp(savedApp!, validApp))
         } else if (data.length > 0) {
           setSelected(data[0].appName)
-          setParams(extractDefaults(data[0]))
+          setParams(loadParamsForApp(data[0].appName, data[0]))
         }
         setLoading(false)
       })
@@ -68,8 +92,12 @@ export default function App() {
   }, [fetchApps])
 
   useEffect(() => {
-    if (selected) localStorage.setItem(STORAGE_KEY, selected)
+    if (selected) localStorage.setItem(STORAGE_KEY_APP, selected)
   }, [selected])
+
+  useEffect(() => {
+    if (selected) saveParamsForApp(selected, params)
+  }, [selected, params])
 
   useEffect(() => {
     sendParams()
@@ -119,9 +147,10 @@ export default function App() {
           <select
           value={selected}
           onChange={(e) => {
-            const app = apps.find((a) => a.appName === e.target.value)
-            setSelected(e.target.value)
-            if (app) setParams(extractDefaults(app))
+            const appName = e.target.value
+            const app = apps.find((a) => a.appName === appName)
+            setSelected(appName)
+            if (app) setParams(loadParamsForApp(appName, app))
           }}
         >
           {apps.map((a) => (

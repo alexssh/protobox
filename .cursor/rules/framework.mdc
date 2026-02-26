@@ -31,7 +31,7 @@ alwaysApply: false
 ## Template Project
 
 - Add preset templates in `templates/presets/*.txt` with `{{NAME}}`, `{{NAMEPASCAL}}`.
-- View templates use `---FILE---` separators: first section is `{Name}Data.ts`, second is the view TSX.
+- Preset templates use `---FILE---` separators for multiple files (Data.ts, TSX, SCSS, index.ts, etc.). App/view get `App`/`View` suffix automatically.
 - Extend libs by adding a new `.ts`/`.tsx` file under `src/libs/` — it becomes an entry point automatically. Re-export from `index.ts` if it should be available via the `protobox` barrel import.
 - `templates/project/src/static/` — shared static/mock data (imported as `@/static`).
 - `templates/project/src/views/{Name}/v1/{Name}Data.ts` — view data layer (defaults + hook).

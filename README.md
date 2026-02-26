@@ -21,15 +21,15 @@ pbox watch Chart           # watch + rebuild only Chart
 pbox watch Chart Lists     # watch + rebuild Chart and Lists
 pbox run                   # start preview server with live reload
 pbox dev                   # run server + watch (one command for development)
-pbox add app Chart         # add app  → src/apps/Chart/
+pbox add app Chart         # add app  → src/apps/ChartApp/ (App suffix auto-added)
 pbox add component Card    # add component → src/components/Card/v1/
-pbox add view Dashboard    # add view → src/views/Dashboard/v1/
+pbox add view Dashboard    # add view → src/views/DashboardView/ (View suffix auto-added)
 ```
 
 ## Preview
 
 - Lists apps from `build/`
-- Switch between apps via dropdown; selection persists in localStorage
+- Switch between apps via dropdown; selection and params per app persist in localStorage (survives reload)
 - Parameter UI (boolean, number, string, option, option-multi) from app config
 - Renders each app in an iframe; passes parameters via `postMessage`
 - **Live reload**: `pbox run` watches `build/` and auto-reloads iframe via SSE when files change
@@ -53,11 +53,11 @@ All entity directories use **PascalCase**: `Chart`, `DemoView`, `Card`.
 
 | Entity    | Directory               | Files                                          |
 | --------- | ----------------------- | ---------------------------------------------- |
-| App       | `src/apps/Chart/`       | `Chart.tsx`, `Chart.scss`, `main.tsx`, `config.ts`, `context.tsx` |
+| App       | `src/apps/ChartApp/`     | `ChartApp.tsx`, `ChartApp.scss`, `main.tsx`, `config.ts`, `context.tsx` |
 | Component | `src/components/Card/`  | `v1/Card.tsx`, `v1/Card.scss`, `index.ts`      |
 | View      | `src/views/ChartView/`  | `v1/ChartView.tsx`, `v1/ChartView.scss`, `index.ts` |
 
-- App files are named after the app (`Chart.tsx`, not `App.tsx`)
+- App and view names get `App`/`View` suffix automatically (`pbox add app Chart` → ChartApp)
 - CSS classes use **kebab-case**: `.chart-app`, `.card--v1`, `.demo-view`
 - `main.tsx` and `config.ts` keep generic names (entry point and config)
 - Components and views do **not** have `main.tsx`, `config.ts`, or parameters
@@ -134,10 +134,10 @@ Use hard-coded versioned paths: `import { X } from "@/components/Card/v1/Card"` 
 ### Workflow
 
 1. `pbox init` → scaffold
-2. `pbox add app MyApp` → new app (creates `src/apps/MyApp/`, `src/types/MyApp/`)
-3. `pbox add view MyView` → new view (`src/views/MyView/v1/`)
+2. `pbox add app Chart` → new app (creates `src/apps/ChartApp/`, `src/@types/ChartApp/`)
+3. `pbox add view Dashboard` → new view (`src/views/DashboardView/v1/`)
 4. `pbox add component Button` → new component (`src/components/Button/v1/`)
-5. Edit `config.ts`, `MyApp.tsx`
+5. Edit `config.ts`, `ChartApp.tsx`
 6. `pbox dev` → server + watch in one command (or `npm run watch` + `npm run server` separately)
 7. `npx pbox watch MyApp` → watch only MyApp for faster rebuilds
 
@@ -165,14 +165,14 @@ templates/
 ### Smart Watch
 
 - `pbox watch` detects which app was changed and rebuilds only that app
-- Changes in `src/apps/Chart/` → rebuild only Chart
+- Changes in `src/apps/ChartApp/` → rebuild only ChartApp
 - Changes in `src/components/`, `src/views/`, `src/types/` → rebuild all apps (shared code)
 - `pbox watch Chart` → watch only Chart; ignore changes to other apps
 - Debounced (200ms) to batch rapid file changes into a single rebuild
 
 ### Extension
 
-- Add templates in `templates/presets/` (`*.txt` with `{{NAME}}` for kebab-case, `{{NAMEPASCAL}}` for PascalCase)
+- Add templates in `templates/presets/` (`*.txt` with `---FILE---` separators, `{{NAME}}` for kebab-case, `{{NAMEPASCAL}}` for PascalCase)
 - Customize project template in `templates/project/`
 - Libs are minimal; extend via new modules
 
