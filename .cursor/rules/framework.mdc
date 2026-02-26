@@ -1,10 +1,10 @@
 ---
-description: Protobox framework development - architecture, build isolation, CLI, libs, preview
+description: Protobox environment development - architecture, build isolation, CLI, libs, preview
 globs: src/**/*, vite*.config.ts, package.json
 alwaysApply: false
 ---
 
-# Protobox Framework Development
+# Protobox Environment Development
 
 ## Architecture
 

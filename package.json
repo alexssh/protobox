@@ -1,7 +1,7 @@
 {
   "name": "protobox",
   "version": "1.0.0",
-  "description": "Prototyping framework for rapid development with React",
+  "description": "Prototyping environment for development with React",
   "type": "module",
   "bin": {
     "pbox": "./dist/cli.js"

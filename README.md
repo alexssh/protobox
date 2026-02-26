@@ -1,6 +1,6 @@
 # protobox
 
-React 18 + TypeScript prototyping framework for rapid project development.
+React 18 + TypeScript prototyping environment for project development.
 
 ## Overview
 
@@ -141,7 +141,7 @@ Use hard-coded versioned paths: `import { X } from "@/components/Card/v1/Card"` 
 6. `pbox dev` → server + watch in one command (or `npm run watch` + `npm run server` separately)
 7. `npx pbox watch MyApp` → watch only MyApp for faster rebuilds
 
-## Framework
+## Environment
 
 ### Structure
 
@@ -179,7 +179,7 @@ templates/
 ## Development
 
 ```bash
-npm run build          # build framework
+npm run build         # build environment
 npm run dev:preview   # dev preview
 ```
 

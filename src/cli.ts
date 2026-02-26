@@ -23,7 +23,7 @@ const commands: Record<string, (args: string[]) => void | Promise<void>> = {
 async function main() {
   if (!cmd || !commands[cmd]) {
     console.log(`
-Protobox - React prototyping framework
+Protobox - React prototyping environment
 
 Usage: pbox <command> [options]
 

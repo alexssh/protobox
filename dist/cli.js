@@ -567,7 +567,7 @@ const commands = {
 async function main() {
   if (!cmd || !commands[cmd]) {
     console.log(`
-Protobox - React prototyping framework
+Protobox - React prototyping environment
 
 Usage: pbox <command> [options]
 
