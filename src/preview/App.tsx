@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 
 const STORAGE_KEY_APP = 'pbox-selected-app'
 const STORAGE_KEY_PARAMS = 'pbox-params'
+const STORAGE_KEY_UI_HIDDEN = 'pbox-ui-hidden'
 
 function loadParamsForApp(appName: string, app: AppMeta): Record<string, unknown> {
   try {
@@ -47,7 +48,13 @@ export default function App() {
   const [params, setParams] = useState<Record<string, unknown>>({})
   const [loading, setLoading] = useState(true)
   const [reloadKey, setReloadKey] = useState(0)
-  const [uiHidden, setUiHidden] = useState(false)
+  const [uiHidden, setUiHidden] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY_UI_HIDDEN) === 'true'
+    } catch {
+      return false
+    }
+  })
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const uiHiddenRef = useRef(uiHidden)
   uiHiddenRef.current = uiHidden
@@ -98,6 +105,12 @@ export default function App() {
   useEffect(() => {
     if (selected) saveParamsForApp(selected, params)
   }, [selected, params])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_UI_HIDDEN, String(uiHidden))
+    } catch {}
+  }, [uiHidden])
 
   useEffect(() => {
     sendParams()
