@@ -16,7 +16,7 @@ import { bem } from 'protobox/bem'
 
 import './{{NAMEPASCAL}}.scss'
 
-const b = bem.bind(null, '{{NAME}}')
+const b = bem.bind(null, '{{NAMEPASCAL}}')
 
 export default function {{NAMEPASCAL}}() {
   const params = useProtoParams()
@@ -44,7 +44,7 @@ body,
   color: #ff00bb;
 }
 
-.{{NAME}} {
+.{{NAMEPASCAL}} {
   display: flex;
   flex-direction: column;
   min-height: 100vh;

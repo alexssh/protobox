@@ -4,7 +4,7 @@ import { bem } from 'protobox/bem'
 
 import './{{NAMEPASCAL}}.scss'
 
-const b = bem.bind(null, '{{NAME}}')
+const b = bem.bind(null, '{{NAMEPASCAL}}')
 
 interface {{NAMEPASCAL}}Props {
   children?: React.ReactNode
@@ -14,7 +14,7 @@ export function {{NAMEPASCAL}}({ children }: {{NAMEPASCAL}}Props) {
   return <div className={b()}>{children}</div>
 }
 ---FILE---
-.{{NAME}} {
+.{{NAMEPASCAL}} {
   position: relative;
 }
 ---FILE---
