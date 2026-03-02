@@ -146,6 +146,28 @@ export default function App() {
     return () => window.removeEventListener('message', handler)
   }, [toggleUi])
 
+  useEffect(() => {
+    if (!('wakeLock' in navigator)) return
+    let lock: WakeLockSentinel | null = null
+    let released = false
+
+    const request = () => {
+      if (released || document.visibilityState !== 'visible') return
+      navigator.wakeLock.request('screen').then((l) => {
+        if (released) { l.release(); return }
+        lock = l
+        l.addEventListener('release', () => { lock = null })
+      }).catch(() => {})
+    }
+
+    request()
+    document.addEventListener('visibilitychange', request)
+    return () => {
+      released = true
+      document.removeEventListener('visibilitychange', request)
+      lock?.release()
+    }
+  }, [])
 
   if (loading) return <div className="pbox-loading">Loading apps...</div>
   if (apps.length === 0) return <div className="pbox-empty">No apps in build/. Run pbox build.</div>

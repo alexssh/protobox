@@ -18,6 +18,6 @@ const bem = (block, element, mods = {}, extra = []) => {
             classList.push(`${base}_${key}`);
         }
     }
-    return classList.concat(extra).join(' ');
+    return classList.concat(extra).join(' ').trim();
 };
 export { bem };
