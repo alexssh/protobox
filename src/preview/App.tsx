@@ -4,6 +4,35 @@ const STORAGE_KEY_APP = 'pbox-selected-app'
 const STORAGE_KEY_PARAMS = 'pbox-params'
 const STORAGE_KEY_UI_HIDDEN = 'pbox-ui-hidden'
 
+const W = window as Window & { __pbox_wakelock_init?: boolean }
+
+function initWakeLock() {
+  if (W.__pbox_wakelock_init || !('wakeLock' in navigator)) return
+  W.__pbox_wakelock_init = true
+
+  let lock: WakeLockSentinel | null = null
+
+  const request = () => {
+    if (lock || document.visibilityState !== 'visible') return
+    navigator.wakeLock.request('screen').then((l) => {
+      lock = l
+      l.addEventListener('release', () => { lock = null })
+    }).catch(() => {})
+  }
+
+  // iOS Safari requires a user gesture before granting wake lock
+  const onInteraction = () => {
+    document.removeEventListener('click', onInteraction, true)
+    document.removeEventListener('touchstart', onInteraction, true)
+    request()
+  }
+
+  request()
+  document.addEventListener('click', onInteraction, true)
+  document.addEventListener('touchstart', onInteraction, true)
+  document.addEventListener('visibilitychange', request)
+}
+
 function loadParamsForApp(appName: string, app: AppMeta): Record<string, unknown> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_PARAMS)
@@ -147,26 +176,7 @@ export default function App() {
   }, [toggleUi])
 
   useEffect(() => {
-    if (!('wakeLock' in navigator)) return
-    let lock: WakeLockSentinel | null = null
-    let released = false
-
-    const request = () => {
-      if (released || document.visibilityState !== 'visible') return
-      navigator.wakeLock.request('screen').then((l) => {
-        if (released) { l.release(); return }
-        lock = l
-        l.addEventListener('release', () => { lock = null })
-      }).catch(() => {})
-    }
-
-    request()
-    document.addEventListener('visibilitychange', request)
-    return () => {
-      released = true
-      document.removeEventListener('visibilitychange', request)
-      lock?.release()
-    }
+    initWakeLock()
   }, [])
 
   if (loading) return <div className="pbox-loading">Loading apps...</div>
